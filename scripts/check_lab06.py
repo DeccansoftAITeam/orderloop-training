@@ -1,6 +1,6 @@
-"""Check for Lab 2 (Permissions). Standard library only.
+"""Check for Lab 6 (Permissions). Standard library only.
 
-Run from the repository root:  python scripts/check_lab02.py
+Run from the repository root:  python scripts/check_lab06.py
 """
 
 import json
