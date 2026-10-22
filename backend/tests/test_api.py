@@ -1,0 +1,62 @@
+def post_refund(client, order_id, amount, reason="Item did not fit", key="k-1"):
+    return client.post(
+        f"/orders/{order_id}/refunds",
+        json={"amount_cents": amount, "reason": reason},
+        headers={"Idempotency-Key": key},
+    )
+
+
+def test_order_queue_lists_all_orders(client):
+    assert len(client.get("/orders").json()) == 8
+
+
+def test_order_queue_search_by_customer_name(client):
+    names = {o["customer_name"] for o in client.get("/orders", params={"q": "Asha"}).json()}
+    assert names == {"Asha Verma"}
+
+
+def test_order_detail_shows_eligibility(client):
+    body = client.get("/orders/1001").json()
+    assert body["eligibility"]["eligible"] is True
+    assert body["eligibility"]["max_refundable_cents"] == 24000
+
+
+def test_unknown_order_is_404(client):
+    assert client.get("/orders/9999").status_code == 404
+
+
+def test_refund_is_recorded(client):
+    res = post_refund(client, 1001, 5000)
+    assert res.status_code == 201
+    assert client.get("/orders/1001").json()["eligibility"]["max_refundable_cents"] == 19000
+
+
+def test_same_idempotency_key_never_refunds_twice(client):
+    first = post_refund(client, 1001, 5000, key="same")
+    second = post_refund(client, 1001, 5000, key="same")
+    assert first.status_code == 201
+    assert second.json()["replayed"] is True
+    assert client.get("/orders/1001").json()["eligibility"]["max_refundable_cents"] == 19000
+
+
+def test_missing_idempotency_key_is_rejected(client):
+    res = client.post("/orders/1001/refunds", json={"amount_cents": 100, "reason": "Too big"})
+    assert res.status_code == 400
+
+
+def test_late_refund_is_not_supported_yet(client):
+    res = post_refund(client, 1003, 1000)
+    assert res.status_code == 409
+    assert res.json()["detail"]["code"] == "late_requires_lead"
+
+
+def test_large_refund_is_not_supported_yet(client):
+    res = post_refund(client, 1008, 30000)
+    assert res.status_code == 409
+    assert res.json()["detail"]["code"] == "approval_required"
+
+
+def test_reply_draft_masks_contact_details(client):
+    res = client.post("/orders/1001/reply-draft", json={"message": "Mail me at a.b@example.test or +1 555 0199 123"})
+    masked = res.json()["masked_message"]
+    assert "example.test" not in masked and "555" not in masked
