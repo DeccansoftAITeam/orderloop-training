@@ -111,7 +111,7 @@ if test_files:
     check(n_tests >= 4, f"at least 4 tests in the capstone test file (found {n_tests})")
     missing = [a for a in ac_ids if not re.search(rf"\b{a}\b", code)]
     check(bool(ac_ids) and not missing,
-          "every AC id appears in a test name or docstring" + (f" (missing: {', '.join(missing)})" if missing else ""))
+          "every AC id appears in a test name or docstring (ac1, AC-1 and ac_1 all count)" + (f" (missing: {', '.join(missing)})" if missing else ""))
     res = pytest(*[f"tests/{p.name}" for p in test_files])
     check(res is not None and res.returncode == 0, "the capstone tests pass")
     res = pytest()
