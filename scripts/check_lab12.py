@@ -33,7 +33,7 @@ def section(text: str, keyword: str) -> str:
     """Body of the first '## ' section whose heading contains keyword."""
     lines = text.splitlines()
     for i, line in enumerate(lines):
-        if re.match(r"#{1,3}\s", line) and keyword in line.lower():
+        if re.match(r"#{1,3}\s*(\d+\.\s*)?" + keyword, line.lower()):
             body = []
             for nxt in lines[i + 1:]:
                 if re.match(r"#{1,3}\s", nxt):
@@ -84,14 +84,14 @@ tier = re.search(r"^risk tier:\s*(\d)\s*$", text, re.M | re.I)
 check(bool(tier) and tier.group(1) == "3", "spec header says 'Risk tier: 3' (this feature moves money)")
 check(not re.search(r"\btbd\b", low) and not re.search(r"<[^>\n]{2,}>", text), "no TBD and no <placeholder> left in the spec")
 
-for keyword in ("problem", "stories", "criteria", "questions", "design", "contracts", "packages", "risk"):
+for keyword in ("problem", "user stories", "acceptance criteria", "open questions", "design delta", "contracts", "work packages", "risk"):
     check(bool(section(text, keyword).strip()), f"spec has a non-empty '{keyword}' section")
 
 stories = re.findall(r"^-\s*US-\d+:\s*as an? .+,\s*i want .+,\s*so that .+", text, re.M | re.I)
 check(len(stories) >= 2, f"at least 2 user stories in 'As a ..., I want ..., so that ...' form (found {len(stories)})")
 
 # --- acceptance criteria (EARS) ---------------------------------------------
-criteria = table(section(text, "criteria"))
+criteria = table(section(text, "acceptance criteria"))
 check(len(criteria) >= 5, f"at least 5 acceptance criteria (found {len(criteria)})")
 ids = [col(r, "id") for r in criteria]
 check(len(set(ids)) == len(ids) and all(re.fullmatch(r"AC-\d+", i) for i in ids), "criteria have unique ids AC-1, AC-2, ...")
@@ -109,13 +109,13 @@ check(criteria and all(re.fullmatch(r"test_\w+", t) for t in test_names), "every
 check(len(set(test_names)) == len(test_names), "no two criteria share a test name")
 
 # --- open questions (grilled) -----------------------------------------------
-questions = table(section(text, "questions"))
+questions = table(section(text, "open questions"))
 check(len(questions) >= 3, f"at least 3 open questions recorded (found {len(questions)})")
 check(questions and all(not empty(col(q, "owner")) for q in questions), "every question has an owner")
 check(questions and all(not empty(col(q, "answer")) and len(col(q, "answer")) >= 10 for q in questions), "every question has a real answer")
 
 # --- work packages ----------------------------------------------------------
-packages = table(section(text, "packages"))
+packages = table(section(text, "work packages"))
 check(len(packages) >= 3, f"at least 3 work packages (found {len(packages)})")
 pkg_ids = [col(p, "id") for p in packages]
 check(len(set(pkg_ids)) == len(pkg_ids) and all(re.fullmatch(r"WP-\d+", i) for i in pkg_ids), "packages have unique ids WP-1, WP-2, ...")
