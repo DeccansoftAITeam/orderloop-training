@@ -1,0 +1,9 @@
+{
+  "type": "result",
+  "subtype": "success",
+  "is_error": false,
+  "num_turns": 1,
+  "result": "I can't answer this from memory. I don't have the OrderLoop `decide` function's code, and you've asked me not to open or search any files. Any code I gave you would be a guess.\n\nIf you let me look at the repo, I can find `decide` and read the late-order and refundable-maximum branch to give you the exact return code.\n\nANSWER: unknown (needs the source)",
+  "total_cost_usd": 0.0031,
+  "duration_ms": 4154
+}

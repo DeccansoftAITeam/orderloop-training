@@ -1,14 +1,14 @@
-"""Check for Lab 2 (Permissions). Standard library only.
+"""Check for Lab 2 (Plan, implement, verify). Standard library only.
 
 Run from the repository root:  python scripts/check_lab02.py
 """
 
-import json
 import subprocess
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+BACKEND = ROOT / "backend"
 failures: list[str] = []
 
 
@@ -18,44 +18,38 @@ def check(ok: bool, message: str) -> None:
         failures.append(message)
 
 
-def git(*args: str) -> str:
-    result = subprocess.run(["git", *args], cwd=ROOT, capture_output=True, text=True)
-    return result.stdout.strip()
+def run(*cmd: str, cwd: Path = ROOT) -> subprocess.CompletedProcess:
+    return subprocess.run(list(cmd), cwd=cwd, capture_output=True, text=True)
 
 
-settings_path = ROOT / ".claude" / "settings.json"
-check(settings_path.exists(), ".claude/settings.json exists")
+branch = run("git", "branch", "--show-current").stdout.strip()
+check(branch != "main", f"you are on your own branch, not main (on '{branch}')")
 
-settings: dict = {}
-if settings_path.exists():
-    try:
-        settings = json.loads(settings_path.read_text(encoding="utf-8"))
-        check(True, ".claude/settings.json is valid JSON")
-    except json.JSONDecodeError as err:
-        check(False, f".claude/settings.json is valid JSON ({err})")
+tests = (BACKEND / "tests" / "test_rules.py").read_text(encoding="utf-8")
+count = sum(1 for line in tests.splitlines() if line.startswith("def test_") and "restocking" in line.lower())
+check(count >= 3, f"at least 3 restocking tests in test_rules.py (found {count})")
 
-perms = settings.get("permissions", {})
-allow, ask, deny = perms.get("allow", []), perms.get("ask", []), perms.get("deny", [])
+probe = (
+    "from datetime import datetime, timedelta\n"
+    "from app import rules\n"
+    "now = datetime(2030, 3, 1)\n"
+    "item = rules.Item('S', 'Stove', 6000, 1, opened=True)\n"
+    "el = rules.eligibility(now - timedelta(days=20), [item], 0, now)\n"
+    "print(el.max_refundable_cents, getattr(el, 'restocking_fee_cents', None))\n"
+)
+result = run("uv", "run", "python", "-c", probe, cwd=BACKEND)
+out = result.stdout.split()
+check(out[:1] == ["5400"], "an opened $60 item 20 days after delivery refunds 5400 cents")
+check(out[1:2] == ["600"], "eligibility reports restocking_fee_cents = 600")
 
-check("Read(./.env)" in deny or "Read(.env)" in deny, "deny rule blocks reading .env")
-check(any(r.startswith("Read(./.env.") or r.startswith("Read(.env.") for r in deny), "deny rule blocks reading .env.* files")
-check(any("customers.csv" in r and r.startswith("Read(") for r in deny), "deny rule blocks reading seed/customers.csv")
-check(any(r.startswith("Bash(git push origin main") for r in deny), "deny rule blocks pushing to main")
-check(any(r.startswith("Bash(curl") for r in deny), "deny rule blocks curl")
-check(any(r.startswith("Bash(uv run pytest") for r in allow), "allow rule covers the test command")
-check(not any(r in ("Bash", "Bash(*)", "Bash(git *)") for r in allow), "allow list has no blanket Bash rule")
-check(not any(r.startswith("Bash(git push") for r in allow), "git push is not allowed without asking")
-check(perms.get("defaultMode") not in ("auto", "bypassPermissions"), "settings do not default to auto or bypass mode")
+tests_run = run("uv", "run", "pytest", "-q", cwd=BACKEND)
+check(tests_run.returncode == 0, "the whole backend test suite passes")
 
-check(not (ROOT / ".claudeignore").exists(), ".claudeignore is gone (it has no effect)")
-
-tracked = git("ls-files").splitlines()
-check(".env" not in tracked, ".env is not tracked by git")
-check(".claude/settings.json" in tracked or git("status", "--porcelain", ".claude/settings.json") != "",
-      ".claude/settings.json is added to git (committed or staged)")
+log = run("git", "log", "--oneline", "main..HEAD").stdout.strip().splitlines()
+check(len(log) >= 1, "at least one commit on your branch")
 
 print()
 if failures:
-    print(f"{len(failures)} CHECK(S) FAILED")
+    print(f"{len(failures)} check(s) failed.")
     sys.exit(1)
 print("ALL CHECKS PASSED")

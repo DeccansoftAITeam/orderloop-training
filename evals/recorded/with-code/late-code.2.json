@@ -1,0 +1,9 @@
+{
+  "type": "result",
+  "subtype": "success",
+  "is_error": false,
+  "num_turns": 3,
+  "result": "In `backend/app/rules.py`, `decide` checks these in order:\n\n1. The reason length must be valid.\n2. The amount must be greater than zero.\n3. The order must be eligible.\n4. The amount must not exceed `max_refundable_cents`.\n5. Only then does it check `el.late`.\n\nAn eligible, late order with an amount within the maximum passes the first four checks. It then hits the late check at line 96 and returns `Decision(False, \"late_requires_lead\", \"Late refunds need lead approval (not supported yet).\")`.\n\nThis assumes a valid reason and an amount above zero. Otherwise `reason_invalid` or `amount_invalid` comes first.\n\nANSWER: late_requires_lead",
+  "total_cost_usd": 0.0119,
+  "duration_ms": 8095
+}

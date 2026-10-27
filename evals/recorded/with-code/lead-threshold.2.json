@@ -1,0 +1,9 @@
+{
+  "type": "result",
+  "subtype": "success",
+  "is_error": false,
+  "num_turns": 4,
+  "result": "In OrderLoop, a refund needs lead approval when it is above 20,000 cents ($200.00). The constant `LEAD_APPROVAL_THRESHOLD_CENTS = 20_000` is set in `backend/app/rules.py:10`. The check at `backend/app/rules.py:98` is `amount_cents > LEAD_APPROVAL_THRESHOLD_CENTS`, so a refund of exactly 20,000 cents does not need approval.\n\nANSWER: 20000",
+  "total_cost_usd": 0.0197,
+  "duration_ms": 12137
+}
