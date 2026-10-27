@@ -161,7 +161,7 @@ if claude is None:
     print("SKIP  claude is not on PATH: skipping `claude plugin validate`")
 else:
     for label, target in (("the plugin", PLUGIN), ("the marketplace", ROOT)):
-        res = subprocess.run([claude, "plugin", "validate", str(target)], capture_output=True, text=True, timeout=120)
+        res = subprocess.run([claude, "plugin", "validate", str(target)], capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=120)
         check(res.returncode == 0, f"`claude plugin validate` passes for {label}")
 
 # --- git hygiene ----------------------------------------------------------
