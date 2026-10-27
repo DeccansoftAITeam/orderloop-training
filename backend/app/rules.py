@@ -98,3 +98,13 @@ def decide(el: Eligibility, amount_cents: int, reason: str) -> Decision:
     if amount_cents > LEAD_APPROVAL_THRESHOLD_CENTS:
         return Decision(False, "approval_required", "Large refunds need lead approval (not supported yet).")
     return Decision(True)
+
+
+def refund_summary(refundable_cents: int, amounts: list[int]) -> dict:
+    """Totals for the refund-summary endpoint. Pure: no database, no clock."""
+    refunded = sum(amounts)
+    return {
+        "refund_count": len(amounts),
+        "refunded_cents": refunded,
+        "remaining_cents": max(refundable_cents - refunded, 0),
+    }

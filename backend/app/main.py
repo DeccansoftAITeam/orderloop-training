@@ -104,6 +104,21 @@ def get_order(order_id: int, conn: sqlite3.Connection = Depends(get_conn), now: 
     }
 
 
+@app.get("/orders/{order_id}/refund-summary")
+def refund_summary(order_id: int, conn: sqlite3.Connection = Depends(get_conn)):
+    order, items, _ = load_order(conn, order_id)
+    rows = conn.execute(
+        "SELECT amount_cents, created_at FROM refunds WHERE order_id = ? ORDER BY id", (order_id,)
+    ).fetchall()
+    refundable = sum(i.total_cents for i in items if i.refundable)
+    summary = rules.refund_summary(refundable, [r["amount_cents"] for r in rows])
+    return {
+        "order_id": order_id,
+        **summary,
+        "last_refund_at": max((r["created_at"] for r in rows), default=None),
+    }
+
+
 @app.post("/orders/{order_id}/refunds", status_code=201)
 def create_refund(
     order_id: int,
