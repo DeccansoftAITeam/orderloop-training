@@ -96,7 +96,7 @@ hit = [k for k, words in topics.items() if any(w in findings.lower() for w in wo
 check(len(hit) >= 5, f"the findings cover at least 5 of the 7 real problems in the code (covered {len(hit)})")
 
 debate = section("Debate")
-check(bool(re.search(r"^Challenged finding:\s*\S{10,}", debate, re.M | re.I)), "Debate names a 'Challenged finding:'")
+check(bool(re.search(r"^Challenged finding:\s*\S.{9,}", debate, re.M | re.I)), "Debate names a 'Challenged finding:'")
 check(bool(re.search(r"^Challenged by:\s*\S+", debate, re.M | re.I)), "Debate names who challenged it ('Challenged by:')")
 check(bool(re.search(r"^Outcome:\s*(kept|withdrawn|changed)\b", debate, re.M | re.I)),
       "Debate has 'Outcome: kept', 'withdrawn' or 'changed'")
@@ -180,6 +180,7 @@ try:
     (tmp / "app").mkdir()
     (tmp / "app" / "__init__.py").write_text("", encoding="utf-8")
     (tmp / "app" / "refund_digest.py").write_text(BASELINE, encoding="utf-8")
+    shutil.copy(BACKEND / "app" / "rules.py", tmp / "app" / "rules.py")
     if TEST_FILE.exists():
         shutil.copy(TEST_FILE, tmp / "test_refund_digest.py")
     old = subprocess.run(
