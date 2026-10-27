@@ -98,3 +98,14 @@ def decide(el: Eligibility, amount_cents: int, reason: str) -> Decision:
     if amount_cents > LEAD_APPROVAL_THRESHOLD_CENTS:
         return Decision(False, "approval_required", "Large refunds need lead approval (not supported yet).")
     return Decision(True)
+
+def requires_lead_approval(amount_cents: int) -> bool:
+    """AC-1, AC-2, AC-3: does a refund of this amount need a lead's approval?
+
+    Strictly above the threshold needs approval; exactly the threshold does not.
+    Money is integer cents, so anything else raises TypeError.
+    """
+    if not isinstance(amount_cents, int) or isinstance(amount_cents, bool):
+        raise TypeError("amount_cents must be an integer number of cents")
+    return amount_cents > LEAD_APPROVAL_THRESHOLD_CENTS
+
