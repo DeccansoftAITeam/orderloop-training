@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "orderloop": {
+      "command": "uv",
+      "args": ["run", "--project", "backend", "--group", "mcp", "python", "mcp/orderloop_server.py"]
+    }
+  }
+}
