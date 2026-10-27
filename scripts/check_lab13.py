@@ -95,23 +95,29 @@ for f in ("backend/app/rules.py", ".claude/settings.json", ".claude/hooks/lane_g
 
 # --- git history: three lanes merged -------------------------------------------
 lanes = json.loads(read(".claude/lanes.json") or "{}")
-found: dict[str, str] = {}
-for name in run("git", "for-each-ref", "--format=%(refname:short)", "refs/heads").stdout.split():
-    lane = re.sub(r"^worktree-", "", name)
-    if lane in lanes:
-        found[lane] = name
-check(set(found) == set(lanes), f"lane branches wp-a, wp-b, wp-c still exist (found {sorted(found)})")
-for lane, name in sorted(found.items()):
-    merged = run("git", "merge-base", "--is-ancestor", name, "HEAD").returncode == 0
-    check(merged, f"branch {name} is merged into {branch}")
-    changed = run("git", "diff", "--name-only", f"{base}...{name}").stdout.split()
-    outside = [f for f in changed if not any(fnmatch.fnmatch(f, p) for p in lanes[lane])]
-    check(bool(changed) and not outside, f"lane {lane} changed only files it owns" + (f" (outside: {outside})" if outside else ""))
-    own_commits = run("git", "log", "--no-merges", "--format=%h", f"{base}..{name}").stdout.split()
-    check(len(own_commits) >= 1, f"lane {lane} has its own commit(s)")
-
-merges = run("git", "log", "--merges", "--format=%h", f"{base}..HEAD").stdout.split()
+merges = run("git", "log", "--merges", "--format=%H", f"{base}..HEAD").stdout.split()
 check(len(merges) >= 3, f"at least 3 merge commits (git merge --no-ff, one per lane) (found {len(merges)})")
+
+
+def owner_lane(files: list[str]) -> str | None:
+    for lane, patterns in lanes.items():
+        if all(any(fnmatch.fnmatch(f, p) for p in patterns) for f in files) and any(f != "CHANGELOG.md" for f in files):
+            return lane
+    return None
+
+
+covered: set[str] = set()
+for sha in merges:
+    parents = run("git", "rev-list", "--parents", "-n", "1", sha).stdout.split()[1:]
+    if len(parents) != 2:
+        continue
+    fork = run("git", "merge-base", parents[0], parents[1]).stdout.strip()
+    files = run("git", "diff", "--name-only", fork, parents[1]).stdout.split()
+    lane = owner_lane(files)
+    check(lane is not None, f"merge {sha[:7]} brings in changes from exactly one lane's files (files: {', '.join(files) or 'none'})")
+    if lane:
+        covered.add(lane)
+check(covered == set(lanes), f"all three lanes were merged (found {sorted(covered)})")
 
 wt = [l for l in run("git", "worktree", "list", "--porcelain").stdout.splitlines() if l.startswith("worktree ")]
 check(len(wt) == 1, f"the extra worktrees are removed (git worktree list shows {len(wt)})")
