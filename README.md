@@ -42,14 +42,26 @@ cd backend
 uv run pytest -q
 ```
 
-Expected: `19 passed`.
+Expected: `20 passed` on `main`. The lab start tags have fewer (for example `17 passed` at `lab-01-start`).
 
 ## How the labs use this repo
 
-Every lab starts from `main`. Create your own branch first:
+Fork this repository once (see `Lab-00-Fork-and-Setup` in the course handouts), clone your fork, add this repository as `upstream` and fetch its tags:
 
 ```
-git switch -c lab-01
+git remote add upstream https://github.com/DeccansoftAITeam/orderloop-training.git
+git fetch upstream --tags
 ```
 
-Labs do not depend on each other. If you get stuck, compare with the branch `lab-NN-solution`.
+Every lab starts from a tag. Create your own branch from it and never commit to `main`:
+
+```
+git switch -c lab-02 lab-02-start
+```
+
+Labs do not depend on each other. If you get stuck, compare with the branch `lab-NN-solution` without merging it:
+
+```
+git fetch upstream
+git diff lab-02 upstream/lab-02-solution
+```

@@ -51,7 +51,8 @@ check(not (ROOT / ".claudeignore").exists(), ".claudeignore is gone (it has no e
 
 tracked = git("ls-files").splitlines()
 check(".env" not in tracked, ".env is not tracked by git")
-check(".claude/settings.json" in tracked or git("status", "--porcelain", ".claude/settings.json") != "",
+staged = git("status", "--porcelain", ".claude/settings.json")
+check(".claude/settings.json" in tracked or (staged != "" and not staged.startswith("??")),
       ".claude/settings.json is added to git (committed or staged)")
 
 print()
