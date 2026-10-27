@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from app import rules
-from app.assistant import FakeDraftProvider, build_draft
+from app.assistant import DraftProviderUnavailable, build_draft, first_name_of, get_provider, provider_settings
 from app.db import get_conn
 
 app = FastAPI(title="OrderLoop API")
@@ -55,6 +55,11 @@ def load_order(conn: sqlite3.Connection, order_id: int):
 def order_eligibility(order, items, refunded, now) -> rules.Eligibility:
     delivered = datetime.fromisoformat(order["delivered_at"]) if order["delivered_at"] else None
     return rules.eligibility(delivered, items, refunded, now)
+
+
+def get_draft_provider():
+    """The draft provider. Tests override this dependency."""
+    return get_provider()
 
 
 @app.get("/health")
@@ -135,19 +140,38 @@ def create_refund(
             "reason": body.reason.strip(), "replayed": False}
 
 
+@app.get("/assistant/status")
+def assistant_status():
+    return provider_settings()
+
+
 @app.post("/orders/{order_id}/reply-draft")
 def reply_draft(
     order_id: int,
     body: DraftRequest,
     conn: sqlite3.Connection = Depends(get_conn),
     now: datetime = Depends(get_now),
+    provider=Depends(get_draft_provider),
 ):
     order, items, refunded = load_order(conn, order_id)
     el = order_eligibility(order, items, refunded, now)
+    # Decision facts come from rules.py. No customer name, contact details or refund reason in here.
     facts = {
         "order_id": order_id,
         "eligible": el.eligible,
+        "late": el.late,
+        "days_since_delivery": el.days_since_delivery,
         "max_refundable_cents": el.max_refundable_cents,
         "blockers": el.blockers,
+        "restocking_fee_cents": 0,
+        "items": [{"name": i.name, "refundable": i.refundable, "total_cents": i.total_cents} for i in items],
     }
-    return build_draft(FakeDraftProvider(), facts, body.message)
+    customer = conn.execute("SELECT name FROM customers WHERE id = ?", (order["customer_id"],)).fetchone()
+    name = customer["name"] if customer else None
+    try:
+        return build_draft(provider, facts, body.message, first_name_of(name), name)
+    except DraftProviderUnavailable as e:
+        raise problem(503, "draft_provider_unavailable", e.message)
+    except Exception:
+        # Never echo SDK errors (they can carry request details); nothing is logged here either.
+        raise problem(502, "draft_provider_error", "The draft provider failed. Try again or use the template provider.")

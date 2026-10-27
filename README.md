@@ -35,6 +35,37 @@ npm run dev
 
 Open http://localhost:5173.
 
+## Reply drafting: template or Claude
+
+The reply draft comes from one of two providers, chosen by `ORDERLOOP_DRAFT_PROVIDER`:
+
+| Value | What it does |
+|---|---|
+| `template` (default) | Deterministic, offline wording that varies by situation. No key, no network. |
+| `claude` | Calls the Anthropic API through the official `anthropic` SDK. |
+
+To use Claude, set the key in the shell that starts the backend. The key is read only from the standard `ANTHROPIC_API_KEY` variable. Never put it in a file or commit it.
+
+PowerShell:
+
+```
+$env:ORDERLOOP_DRAFT_PROVIDER = "claude"
+$env:ANTHROPIC_API_KEY = Read-Host "Anthropic API key"   # or paste it; it stays in this session only
+uv run uvicorn app.main:app --reload --port 8000
+```
+
+bash:
+
+```
+export ORDERLOOP_DRAFT_PROVIDER=claude
+read -rs ANTHROPIC_API_KEY && export ANTHROPIC_API_KEY
+uv run uvicorn app.main:app --reload --port 8000
+```
+
+The default model is `claude-haiku-5-5` (cheap); set `ORDERLOOP_DRAFT_MODEL` to use another. `GET /assistant/status` returns `{"provider", "model", "configured"}` (never the key). If `claude` is selected and no key is set, the draft endpoint returns `503` with `{"detail": {"code": "draft_provider_unavailable", ...}}`.
+
+Privacy: the model sees only the masked customer message, item names, delivery timing, the refund decision from `rules.py` and a tone instruction. It never sees the customer's name, email, phone, address or the refund reason. It writes `{first_name}` and the backend fills in the real first name afterwards. A draft containing a dollar amount that `rules.py` did not produce is regenerated once, then replaced by the template draft with `"fallback": "claude_draft_rejected"`. Prompts and drafts are not logged. The response adds `provider` and `model` to the existing fields.
+
 ## Run the tests
 
 ```
@@ -42,7 +73,7 @@ cd backend
 uv run pytest -q
 ```
 
-Expected: `20 passed` on `main`. The lab start tags have fewer (for example `17 passed` at `lab-01-start`).
+Expected: `35 passed` on `main`. The lab start tags have fewer (for example `17 passed` at `lab-01-start`).
 
 ## How the labs use this repo
 
