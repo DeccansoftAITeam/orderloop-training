@@ -1,6 +1,6 @@
 ---
 name: qa
-description: Read-only QA. Runs the test suite and the API checks against the current branch and reports pass or fail with evidence. Use after implementation to confirm behaviour. Cannot edit code.
+description: Read-only QA. Runs the test suite, maps each acceptance criterion to a test, and reports pass or fail. Use after implementation to confirm behaviour. Cannot edit code.
 tools: Read, Grep, Glob, Bash
 disallowedTools: Write, Edit, NotebookEdit
 model: haiku
