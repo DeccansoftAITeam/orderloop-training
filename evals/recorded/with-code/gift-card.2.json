@@ -1,0 +1,9 @@
+{
+  "type": "result",
+  "subtype": "success",
+  "is_error": false,
+  "num_turns": 2,
+  "result": "No. In `backend/app/rules.py:30-31`, an item is refundable only if it is neither final sale nor a gift card:\n\n```python\ndef refundable(self) -> bool:\n    return not (self.final_sale or self.gift_card)\n```\n\nGift cards are left out of the refundable total. An order that contains only gift cards and final-sale items gets the `no_refundable_items` blocker. `test_final_sale_and_gift_cards_never_qualify` in `backend/tests/test_rules.py` covers this.\n\nANSWER: no",
+  "total_cost_usd": 0.0151,
+  "duration_ms": 6125
+}

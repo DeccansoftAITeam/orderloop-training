@@ -1,0 +1,9 @@
+{
+  "type": "result",
+  "subtype": "success",
+  "is_error": false,
+  "num_turns": 3,
+  "result": "A refund above 20,000 cents (\\$200.00) needs lead approval. `LEAD_APPROVAL_THRESHOLD_CENTS = 20_000` is set in `backend/app/rules.py:10`. The check at line 98 uses `>`, so a refund of exactly 20,000 cents does not need approval.\n\nANSWER: 20000",
+  "total_cost_usd": 0.0217,
+  "duration_ms": 8369
+}

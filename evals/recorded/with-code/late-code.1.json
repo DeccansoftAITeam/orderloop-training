@@ -1,0 +1,9 @@
+{
+  "type": "result",
+  "subtype": "success",
+  "is_error": false,
+  "num_turns": 2,
+  "result": "For an eligible order that is late, with an amount within the refundable maximum, `decide` returns `Decision(False, \"late_requires_lead\", ...)`. The function is in `backend\\app\\rules.py:86`.\n\nThis assumes the reason is valid and the amount is greater than zero. The checks run in this order:\n1. The reason and amount checks pass.\n2. The order is eligible, so the `not_eligible` check passes.\n3. The amount is within the maximum, so the `exceeds_max` check passes.\n4. `el.late` is true, so the function returns at line 97. The large-refund check never runs.\n\nThe message returned with it is \"Late refunds need lead approval (not supported yet).\"\n\nANSWER: late_requires_lead",
+  "total_cost_usd": 0.0107,
+  "duration_ms": 6873
+}

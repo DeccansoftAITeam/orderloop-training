@@ -1,0 +1,9 @@
+{
+  "type": "result",
+  "subtype": "success",
+  "is_error": false,
+  "num_turns": 3,
+  "result": "No, a refund request isn't late at exactly 30 days. In `backend/app/rules.py`, `REFUND_WINDOW_DAYS = 30` and `late = days is not None and days > REFUND_WINDOW_DAYS`. The comment on that line says \"exactly 30 days is still on time\". The seed data in `backend/app/seed.py` agrees: order 1002, delivered 30 days ago, is marked \"still on time\", and order 1003 at 31 days is marked \"late\".\n\nANSWER: no",
+  "total_cost_usd": 0.0235,
+  "duration_ms": 10080
+}

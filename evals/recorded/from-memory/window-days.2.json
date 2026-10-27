@@ -1,0 +1,9 @@
+{
+  "type": "result",
+  "subtype": "success",
+  "is_error": false,
+  "num_turns": 1,
+  "result": "I don't know this one. The OrderLoop refund rules aren't something I have from memory, and you asked me not to open or search any files, so I can't look them up in the repo. Any number I gave would be a guess.\n\nIf you let me search the repo, I can find the refund rule and give you the exact number of days.\n\nANSWER: unknown",
+  "total_cost_usd": 0.0028,
+  "duration_ms": 4287
+}

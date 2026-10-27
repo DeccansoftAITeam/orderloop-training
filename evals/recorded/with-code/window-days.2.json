@@ -1,0 +1,9 @@
+{
+  "type": "result",
+  "subtype": "success",
+  "is_error": false,
+  "num_turns": 3,
+  "result": "The refund window in `backend/app/rules.py` is 30 days (`REFUND_WINDOW_DAYS = 30`). A refund counts as late only when `days > 30`, so a refund exactly 30 days after delivery is still on time. It stops being on time on day 31.\n\nThe question asks how many days after delivery a refund stops being on time. I'm reading that as the 30-day window limit, not day 31, the first late day.\n\nANSWER: 30",
+  "total_cost_usd": 0.0084,
+  "duration_ms": 8798
+}

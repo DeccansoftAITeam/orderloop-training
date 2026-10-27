@@ -1,0 +1,9 @@
+{
+  "type": "result",
+  "subtype": "success",
+  "is_error": false,
+  "num_turns": 2,
+  "result": "The maximum refund reason length is 200 characters. It's set as `MAX_REASON_LENGTH = 200` in `backend/app/rules.py:12`. The check at line 88 rejects any reason shorter than 3 or longer than 200 characters.\n\nANSWER: 200",
+  "total_cost_usd": 0.0108,
+  "duration_ms": 5755
+}

@@ -1,0 +1,9 @@
+{
+  "type": "result",
+  "subtype": "success",
+  "is_error": false,
+  "num_turns": 3,
+  "result": "A refund stops being on time after 30 days. The rule in `backend/app/rules.py` sets `REFUND_WINDOW_DAYS = 30` and marks a refund late only when days since delivery is greater than 30. A refund made exactly 30 days after delivery is still on time, so day 31 is the first late day.\n\nANSWER: 30",
+  "total_cost_usd": 0.0118,
+  "duration_ms": 9057
+}
