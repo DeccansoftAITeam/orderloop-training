@@ -5,34 +5,39 @@ This module is the change under review in Lab 14. It is not wired into the API y
 Inputs are plain dicts:
   refunds:   {"id": str, "customer_id": str, "amount_cents": int, "reason": str}
   customers: {"id": str, "name": str, "email": str}
+
+Money is integer cents. Nothing that identifies a customer is logged or used as a key.
 """
 
 import logging
 
+from app.rules import LEAD_APPROVAL_THRESHOLD_CENTS
+
 log = logging.getLogger("refund_digest")
 
-LARGE_REFUND_CENTS = 20000
+UNKNOWN_CUSTOMER = "unknown"
 
 
 def build_digest(refunds, customers):
+    known = {c["id"] for c in customers}  # one pass, then O(1) lookups
+
     total = 0
+    by_customer: dict[str, int] = {}
+    large = []
     for r in refunds:
-        total += r["amount_cents"]
-    average_cents = total / len(refunds)
+        amount = r["amount_cents"]
+        total += amount
+        key = r["customer_id"] if r["customer_id"] in known else UNKNOWN_CUSTOMER
+        by_customer[key] = by_customer.get(key, 0) + amount
+        if amount > LEAD_APPROVAL_THRESHOLD_CENTS:
+            large.append(r["id"])
+        log.debug("refund %s counted for %s: %s cents", r["id"], key, amount)
 
-    by_customer = {}
-    for r in refunds:
-        for c in customers:
-            if c["id"] == r["customer_id"]:
-                log.info("refund %s for %s <%s>: %s cents", r["id"], c["name"], c["email"], r["amount_cents"])
-                by_customer[c["email"]] = by_customer.get(c["email"], 0) + r["amount_cents"]
-
-    large = [r["id"] for r in refunds if r["amount_cents"] >= LARGE_REFUND_CENTS]
-
+    count = len(refunds)
     return {
-        "count": len(refunds),
+        "count": count,
         "total_cents": total,
-        "average_cents": average_cents,
+        "average_cents": total // count if count else 0,
         "by_customer": by_customer,
         "large": large,
     }
