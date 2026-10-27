@@ -36,7 +36,8 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return body as T;
 }
 
-export const listOrders = (q: string) => request<OrderSummary[]>(`/orders?q=${encodeURIComponent(q)}`);
+export const listOrders = (q: string, status = "") =>
+  request<OrderSummary[]>(`/orders?q=${encodeURIComponent(q)}${status ? `&status=${encodeURIComponent(status)}` : ""}`);
 export const getOrder = (id: number) => request<OrderDetail>(`/orders/${id}`);
 
 export const createRefund = (id: number, amountCents: number, reason: string) =>

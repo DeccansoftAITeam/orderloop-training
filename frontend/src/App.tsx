@@ -5,12 +5,13 @@ const dollars = (cents: number) => `$${(cents / 100).toFixed(2)}`;
 
 export default function App() {
   const [query, setQuery] = useState("");
+  const [status, setStatus] = useState("");
   const [orders, setOrders] = useState<OrderSummary[]>([]);
   const [selected, setSelected] = useState<number | null>(null);
 
   useEffect(() => {
-    listOrders(query).then(setOrders).catch(() => setOrders([]));
-  }, [query]);
+    listOrders(query, status).then(setOrders).catch(() => setOrders([]));
+  }, [query, status]);
 
   return (
     <main>
@@ -22,6 +23,11 @@ export default function App() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
+          <select value={status} onChange={(e) => setStatus(e.target.value)} aria-label="Filter by status">
+            <option value="">All</option>
+            <option value="delivered">delivered</option>
+            <option value="shipped">shipped</option>
+          </select>
           <table>
             <thead>
               <tr><th>Order</th><th>Customer</th><th>Total</th><th>Status</th></tr>

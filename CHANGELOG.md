@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- (each work package replaces this line with one line about its change)
+- Added a status filter drop-down to the order queue.
 
 ## 0.1.0
 
