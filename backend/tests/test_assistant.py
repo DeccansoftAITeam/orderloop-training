@@ -174,3 +174,12 @@ def test_no_workspace_header_when_not_set(monkeypatch):
     from app.assistant import ClaudeDraftProvider
     ClaudeDraftProvider()._get_client()
     assert seen["default_headers"] is None
+
+
+def test_prompt_states_the_decision_in_plain_words():
+    from app.assistant import build_prompt
+    base = {"order_id": 1, "items": [], "days_since_delivery": 31, "eligible": True, "late": True,
+            "blockers": [], "max_refundable_cents": 7000, "restocking_fee_cents": 0}
+    assert "a support lead must review it" in build_prompt(base, "hi")
+    assert "cannot be refunded" in build_prompt({**base, "eligible": False, "late": False}, "hi")
+    assert "a refund can be recorded" in build_prompt({**base, "late": False}, "hi")
