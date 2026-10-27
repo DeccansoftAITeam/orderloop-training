@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- (each work package replaces this line with one line about its change)
+- Added GET /stats/refunds: refund count and total refunded cents.
 
 ## 0.1.0
 
