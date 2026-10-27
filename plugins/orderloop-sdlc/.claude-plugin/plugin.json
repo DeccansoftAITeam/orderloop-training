@@ -1,0 +1,6 @@
+{
+  "name": "orderloop-sdlc",
+  "version": "1.1.0",
+  "description": "OrderLoop team toolkit: refund policy and PR summary skills, the Refund Triage agent, and its authority guard hook",
+  "author": { "name": "Deccansoft AI Team" }
+}

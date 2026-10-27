@@ -1,0 +1,12 @@
+{
+  "name": "orderloop-team",
+  "owner": { "name": "Deccansoft AI Team" },
+  "description": "Plugins for the OrderLoop team",
+  "plugins": [
+    {
+      "name": "orderloop-sdlc",
+      "source": "./plugins/orderloop-sdlc",
+      "description": "Refund policy and PR summary skills, Refund Triage agent, authority guard hook"
+    }
+  ]
+}

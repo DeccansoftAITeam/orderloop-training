@@ -12,21 +12,7 @@
       "Read(./seed/customers.csv)"
     ]
   },
-  "enabledMcpjsonServers": ["orderloop"],
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python",
-            "args": ["${CLAUDE_PROJECT_DIR}/.claude/hooks/refund_guard.py"],
-            "onFailure": "block",
-            "statusMessage": "Checking refund authority"
-          }
-        ]
-      }
-    ]
-  }
+  "enabledMcpjsonServers": [
+    "orderloop"
+  ]
 }

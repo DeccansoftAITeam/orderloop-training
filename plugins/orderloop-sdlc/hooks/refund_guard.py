@@ -38,7 +38,8 @@ def main() -> None:
     except Exception as exc:  # fail closed
         block(f"could not read the hook input ({exc}).")
 
-    agent = event.get("agent_type")
+    # A plugin agent reports its namespaced name, e.g. "orderloop-sdlc:refund-triage".
+    agent = (event.get("agent_type") or "").split(":")[-1]
 
     if tool.startswith("mcp__orderloop__") and tool not in KNOWN_ORDERLOOP_TOOLS:
         block(f"{tool} is not a known read-only orderloop tool.")

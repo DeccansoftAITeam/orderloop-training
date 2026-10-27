@@ -1,0 +1,18 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python",
+            "args": ["${CLAUDE_PLUGIN_ROOT}/hooks/refund_guard.py"],
+            "onFailure": "block",
+            "statusMessage": "Checking refund authority"
+          }
+        ]
+      }
+    ]
+  }
+}
