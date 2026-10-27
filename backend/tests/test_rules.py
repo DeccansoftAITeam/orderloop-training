@@ -51,3 +51,35 @@ def test_reason_must_be_three_to_two_hundred_characters():
 def test_undelivered_order_is_not_eligible():
     el = rules.eligibility(None, [tent()], 0, NOW)
     assert "not_delivered" in el.blockers
+
+
+def stove(opened: bool) -> Item:
+    return Item("STOVE-1", "Camp stove", 6000, 1, opened=opened)
+
+
+def test_opened_item_loses_ten_percent_restocking_fee():
+    el = rules.eligibility(delivered(20), [stove(opened=True)], 0, NOW)
+    assert el.restocking_fee_cents == 600
+    assert el.max_refundable_cents == 5400
+
+
+def test_unopened_item_has_no_restocking_fee():
+    el = rules.eligibility(delivered(20), [stove(opened=False)], 0, NOW)
+    assert el.restocking_fee_cents == 0
+    assert el.max_refundable_cents == 6000
+
+
+def test_restocking_fee_rounds_down_to_whole_cents():
+    odd = Item("X", "Cable", 999, 1, opened=True)
+    assert odd.restocking_fee_cents == 99
+
+
+def test_restocking_fee_applies_per_opened_line_only():
+    el = rules.eligibility(delivered(5), [tent(), stove(opened=True)], 0, NOW)
+    assert el.max_refundable_cents == 18000 + 5400
+
+
+def test_final_sale_opened_item_is_still_never_refundable():
+    item = Item("S", "Socks", 1000, 1, opened=True, final_sale=True)
+    el = rules.eligibility(delivered(1), [item], 0, NOW)
+    assert el.restocking_fee_cents == 0 and not el.eligible

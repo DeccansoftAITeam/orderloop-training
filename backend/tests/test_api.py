@@ -18,7 +18,7 @@ def test_order_queue_search_by_customer_name(client):
 def test_order_detail_shows_eligibility(client):
     body = client.get("/orders/1001").json()
     assert body["eligibility"]["eligible"] is True
-    assert body["eligibility"]["max_refundable_cents"] == 24000
+    assert body["eligibility"]["max_refundable_cents"] == 23400
 
 
 def test_unknown_order_is_404(client):
@@ -28,7 +28,7 @@ def test_unknown_order_is_404(client):
 def test_refund_is_recorded(client):
     res = post_refund(client, 1001, 5000)
     assert res.status_code == 201
-    assert client.get("/orders/1001").json()["eligibility"]["max_refundable_cents"] == 19000
+    assert client.get("/orders/1001").json()["eligibility"]["max_refundable_cents"] == 18400
 
 
 def test_same_idempotency_key_never_refunds_twice(client):
@@ -36,7 +36,7 @@ def test_same_idempotency_key_never_refunds_twice(client):
     second = post_refund(client, 1001, 5000, key="same")
     assert first.status_code == 201
     assert second.json()["replayed"] is True
-    assert client.get("/orders/1001").json()["eligibility"]["max_refundable_cents"] == 19000
+    assert client.get("/orders/1001").json()["eligibility"]["max_refundable_cents"] == 18400
 
 
 def test_missing_idempotency_key_is_rejected(client):
