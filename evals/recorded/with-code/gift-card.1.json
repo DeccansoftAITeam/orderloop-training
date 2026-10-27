@@ -1,0 +1,9 @@
+{
+  "type": "result",
+  "subtype": "success",
+  "is_error": false,
+  "num_turns": 2,
+  "result": "No. In OrderLoop, an item that is a gift card can't be refunded. In `backend/app/rules.py:30-31`, an item's `refundable` property is `not (self.final_sale or self.gift_card)`. Gift cards are therefore left out of the refundable total. If an order has only gift cards and final-sale items, it gets the `no_refundable_items` blocker. The feature doc `docs/feature-refund-status.md` says the same: \"items that are final sale or gift cards never count.\"\n\nANSWER: no",
+  "total_cost_usd": 0.018,
+  "duration_ms": 6324
+}

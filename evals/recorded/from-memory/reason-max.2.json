@@ -1,0 +1,9 @@
+{
+  "type": "result",
+  "subtype": "success",
+  "is_error": false,
+  "num_turns": 1,
+  "result": "I don't know this from memory. I have no reliable knowledge of OrderLoop's refund reason limit, and you asked me not to open or search any files, so I can't check the code. I'd rather not guess a number.\n\nIf you let me search the repo, I can look for the validation, such as a `max_length` or `maxLength` on a refund `reason` field, and give you the exact value.\n\nANSWER: unknown",
+  "total_cost_usd": 0.0028,
+  "duration_ms": 4121
+}

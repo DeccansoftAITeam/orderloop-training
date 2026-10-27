@@ -1,0 +1,21 @@
+Nightly settlement for 2030-02-15
+==============================================================================
+Merchant         Tier Orders        Gross    Refunds       Fee          Net  Units
+Birchwood Gear      -      2        29.98       0.00      0.96        29.02     29
+Zoë's Tents         1      1        88.00       0.00      1.76        86.24     86
+Kestrel Outfitte    1      2       175.49     144.99      4.37        26.13     26
+Łódź Camping        2      2       204.75       0.00      5.63       199.12    199
+Café Müller         2      2        77.00       0.00      2.30        74.70     74
+Nordic Trail Co     3      1        10.00      12.00      0.25        -2.25     -3
+------------------------------------------------------------------------------
+Totals: orders=10 gross=585.22 refunds=156.99 fee=15.27 net=412.96
+Partner share of fees: 7.65
+Refund ratio: 26.8%
+Average order (cents): 5852
+Smallest order: 9.99
+First line: M04
+Merchants we pay: 5
+Merchants who owe us: 1
+Ignored: future=10 cancelled=0 unknown_merchant=1
+Rows skipped: orders=1 refunds=1
+Orphan refunds: none

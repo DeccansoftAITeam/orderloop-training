@@ -1,0 +1,9 @@
+{
+  "type": "result",
+  "subtype": "success",
+  "is_error": false,
+  "num_turns": 1,
+  "result": "I don't know this one from memory. The refund approval threshold for OrderLoop is specific to your project, and I haven't seen it in this conversation. I was told not to open or search files, so I can't check the repo. Any number I gave would be a guess.\n\nIf you want me to look it up, I'd search the repo for the refund and approval rules. Likely places are config, constants, or docs mentioning \"lead approval\".\n\nANSWER: unknown",
+  "total_cost_usd": 0.0034,
+  "duration_ms": 4769
+}

@@ -1,0 +1,9 @@
+{
+  "type": "result",
+  "subtype": "success",
+  "is_error": false,
+  "num_turns": 1,
+  "result": "I don't know this from memory. The refund reason limit is specific to OrderLoop's code or config, and I can't answer it without looking. You asked me not to open or search files, so I haven't, and I won't guess a number.\n\nIf you let me search the repo, I'd look for the validation on the refund reason field, such as a `max_length` constraint, a schema limit, or a database column size.\n\nANSWER: unknown",
+  "total_cost_usd": 0.0071,
+  "duration_ms": 4969
+}

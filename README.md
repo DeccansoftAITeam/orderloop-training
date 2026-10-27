@@ -42,7 +42,7 @@ cd backend
 uv run pytest -q
 ```
 
-Expected: `17 passed`.
+Expected: `19 passed`.
 
 ## How the labs use this repo
 

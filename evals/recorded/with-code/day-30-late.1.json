@@ -1,0 +1,9 @@
+{
+  "type": "result",
+  "subtype": "success",
+  "is_error": false,
+  "num_turns": 2,
+  "result": "The rules file says the window is 30 days and that exactly 30 days is still on time (`backend\\app\\rules.py:9` and `:66`). Late means `days > 30`.\n\nAn order delivered exactly 30 days ago is not late.\n\nANSWER: no",
+  "total_cost_usd": 0.0162,
+  "duration_ms": 5970
+}

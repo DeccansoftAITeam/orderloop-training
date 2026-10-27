@@ -1,0 +1,9 @@
+{
+  "type": "result",
+  "subtype": "success",
+  "is_error": false,
+  "num_turns": 1,
+  "result": "I can't answer this from memory. The OrderLoop refund window is specific to your project, and I have no record of it. I was told not to open or search any files, so I haven't looked, and I won't guess a number.\n\nIf you let me search the repo, I can find the refund rule and give you the exact figure.\n\nANSWER: unknown",
+  "total_cost_usd": 0.0101,
+  "duration_ms": 4469
+}
