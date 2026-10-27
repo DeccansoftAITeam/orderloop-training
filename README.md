@@ -78,7 +78,7 @@ cd backend
 uv run pytest -q
 ```
 
-Expected: `40 passed` on `main`. The lab start tags have fewer (for example `17 passed` at `lab-01-start`).
+Expected: `40 passed` on `main`. The lab start tags have fewer (for example `37 passed` at `lab-01-start`).
 
 ## How the labs use this repo
 
