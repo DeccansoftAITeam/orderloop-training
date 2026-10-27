@@ -83,6 +83,15 @@ def eligibility(
     )
 
 
+def refund_status(refundable_cents: int, refunded_cents: int) -> str:
+    """"none", "partial" or "full", for the order queue. Money is integer cents."""
+    if refunded_cents <= 0:
+        return "none"
+    if refunded_cents >= refundable_cents:
+        return "full"
+    return "partial"
+
+
 def decide(el: Eligibility, amount_cents: int, reason: str) -> Decision:
     reason = reason.strip()
     if not MIN_REASON_LENGTH <= len(reason) <= MAX_REASON_LENGTH:

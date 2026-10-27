@@ -1,5 +1,6 @@
 import sqlite3
 from datetime import datetime
+from typing import Literal
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
@@ -66,11 +67,15 @@ def health():
 def list_orders(
     q: str | None = Query(None, description="Search by order id or customer name"),
     status: str | None = None,
+    refund_status: Literal["none", "partial", "full"] | None = None,
     conn: sqlite3.Connection = Depends(get_conn),
 ):
     sql = (
         "SELECT o.id, o.status, o.placed_at, o.delivered_at, c.name AS customer_name, "
-        "(SELECT COALESCE(SUM(unit_price_cents * qty), 0) FROM order_items WHERE order_id = o.id) AS total_cents "
+        "(SELECT COALESCE(SUM(unit_price_cents * qty), 0) FROM order_items WHERE order_id = o.id) AS total_cents, "
+        "(SELECT COALESCE(SUM(unit_price_cents * qty), 0) FROM order_items "
+        "WHERE order_id = o.id AND final_sale = 0 AND gift_card = 0) AS refundable_cents, "
+        "(SELECT COALESCE(SUM(amount_cents), 0) FROM refunds WHERE order_id = o.id) AS refunded_cents "
         "FROM orders o JOIN customers c ON c.id = o.customer_id WHERE 1 = 1"
     )
     params: list = []
@@ -81,7 +86,13 @@ def list_orders(
         sql += " AND (CAST(o.id AS TEXT) LIKE ? OR c.name LIKE ?)"
         params += [f"%{q}%", f"%{q}%"]
     sql += " ORDER BY o.id"
-    return [dict(r) for r in conn.execute(sql, params).fetchall()]
+    orders = []
+    for row in conn.execute(sql, params).fetchall():
+        order = dict(row)
+        order["refund_status"] = rules.refund_status(order.pop("refundable_cents"), order["refunded_cents"])
+        if refund_status is None or order["refund_status"] == refund_status:
+            orders.append(order)
+    return orders
 
 
 @app.get("/orders/{order_id}")

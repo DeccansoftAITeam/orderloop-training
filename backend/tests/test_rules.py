@@ -51,3 +51,20 @@ def test_reason_must_be_three_to_two_hundred_characters():
 def test_undelivered_order_is_not_eligible():
     el = rules.eligibility(None, [tent()], 0, NOW)
     assert "not_delivered" in el.blockers
+
+
+def test_refund_status_none_when_nothing_refunded():
+    assert rules.refund_status(10000, 0) == "none"
+
+
+def test_refund_status_none_when_nothing_is_refundable():
+    assert rules.refund_status(0, 0) == "none"
+
+
+def test_refund_status_partial_when_some_is_left():
+    assert rules.refund_status(10000, 4000) == "partial"
+    assert rules.refund_status(10000, 9999) == "partial"
+
+
+def test_refund_status_full_when_everything_refundable_is_refunded():
+    assert rules.refund_status(10000, 10000) == "full"

@@ -60,3 +60,44 @@ def test_reply_draft_masks_contact_details(client):
     res = client.post("/orders/1001/reply-draft", json={"message": "Mail me at a.b@example.test or +1 555 0199 123"})
     masked = res.json()["masked_message"]
     assert "example.test" not in masked and "555" not in masked
+
+
+def test_refund_status_on_each_queue_row(client):
+    rows = {o["id"]: o for o in client.get("/orders").json()}
+    assert rows[1001]["refund_status"] == "none"
+    assert rows[1007]["refund_status"] == "partial"
+    assert rows[1007]["refunded_cents"] == 5000
+
+
+def test_refund_status_becomes_full_after_the_last_refund(client):
+    post_refund(client, 1002, 9500)
+    rows = {o["id"]: o for o in client.get("/orders").json()}
+    assert rows[1002]["refund_status"] == "full"
+
+
+def test_refund_status_ignores_final_sale_items(client):
+    # Order 1004: only the 12000 jacket is refundable; the final-sale socks never count.
+    post_refund(client, 1004, 12000)
+    rows = {o["id"]: o for o in client.get("/orders").json()}
+    assert rows[1004]["refund_status"] == "full"
+
+
+def test_refund_status_filter_returns_matching_orders_only(client):
+    ids = [o["id"] for o in client.get("/orders", params={"refund_status": "partial"}).json()]
+    assert ids == [1007]
+
+
+def test_refund_status_filter_combines_with_search(client):
+    res = client.get("/orders", params={"refund_status": "none", "q": "Asha"}).json()
+    assert all(o["refund_status"] == "none" for o in res)
+
+
+def test_refund_status_filter_rejects_unknown_value(client):
+    assert client.get("/orders", params={"refund_status": "bogus"}).status_code == 422
+
+
+def test_refund_status_queue_does_not_expose_contact_details_or_reason(client):
+    post_refund(client, 1002, 9500, reason="Secret reason text")
+    row = client.get("/orders").json()[0]
+    assert not ({"email", "phone", "address", "reason", "customer_email"} & set(row))
+    assert "Secret reason text" not in str(client.get("/orders").json())
