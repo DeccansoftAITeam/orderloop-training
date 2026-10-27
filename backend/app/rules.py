@@ -84,7 +84,7 @@ def eligibility(
 
 
 def refund_status(refundable_cents: int, refunded_cents: int) -> str:
-    """"none", "partial" or "full", for the order queue. Money is integer cents."""
+    """Return "none", "partial" or "full" for the order queue. Money is integer cents."""
     if refunded_cents <= 0:
         return "none"
     if refunded_cents >= refundable_cents:
