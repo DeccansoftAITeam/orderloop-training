@@ -8,6 +8,7 @@ import json
 import sys
 
 BLOCKING = {"critical", "high"}
+KNOWN = BLOCKING | {"medium", "low"}
 
 
 def decode(raw: bytes) -> str:
@@ -27,10 +28,12 @@ def decide(raw: bytes) -> tuple[int, str]:
     out = data.get("structured_output")
     if not isinstance(out, dict):
         return 2, "no structured_output"
-    verdict, findings = out.get("verdict"), out.get("findings", [])
+    verdict, findings = out.get("verdict"), out.get("findings")
     if verdict not in ("approve", "changes_requested") or not isinstance(findings, list):
         return 2, "verdict or findings not valid"
-    blocking = [f for f in findings if isinstance(f, dict) and str(f.get("severity", "")).lower() in BLOCKING]
+    if not all(isinstance(f, dict) and f.get("severity") in KNOWN for f in findings):
+        return 2, "a finding has no known severity"  # an unknown word must not slip through as harmless
+    blocking = [f for f in findings if f["severity"] in BLOCKING]
     if verdict == "changes_requested" or blocking:
         return 1, f"changes requested ({len(blocking)} blocking findings)"
     return 0, "approved"
