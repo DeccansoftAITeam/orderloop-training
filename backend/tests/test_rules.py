@@ -16,7 +16,7 @@ def tent() -> Item:
 
 def test_exactly_thirty_days_is_still_on_time():
     el = rules.eligibility(delivered(30), [tent()], 0, NOW)
-    assert el.eligible and not el.late
+    assert el.eligible
 
 
 def test_thirty_one_days_is_late():

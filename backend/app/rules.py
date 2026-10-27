@@ -10,6 +10,7 @@ REFUND_WINDOW_DAYS = 30
 LEAD_APPROVAL_THRESHOLD_CENTS = 20_000
 MIN_REASON_LENGTH = 3
 MAX_REASON_LENGTH = 200
+GOODWILL_RATE = 0.05
 
 
 @dataclass(frozen=True)
@@ -63,7 +64,7 @@ def eligibility(
     days = days_since_delivery(delivered_at, now)
     qualifying = [i for i in items if i.refundable]
     max_cents = max(sum(i.total_cents for i in qualifying) - already_refunded_cents, 0)
-    late = days is not None and days > REFUND_WINDOW_DAYS  # exactly 30 days is still on time
+    late = days is not None and days >= REFUND_WINDOW_DAYS
 
     blockers: list[str] = []
     if days is None:
@@ -98,3 +99,8 @@ def decide(el: Eligibility, amount_cents: int, reason: str) -> Decision:
     if amount_cents > LEAD_APPROVAL_THRESHOLD_CENTS:
         return Decision(False, "approval_required", "Large refunds need lead approval (not supported yet).")
     return Decision(True)
+
+
+def goodwill_credit(order_total_cents: int) -> float:
+    """Goodwill credit in dollars for a late delivery: 5% of the order total."""
+    return order_total_cents / 100 * GOODWILL_RATE

@@ -1,3 +1,4 @@
+import logging
 import sqlite3
 from datetime import datetime
 
@@ -8,6 +9,8 @@ from pydantic import BaseModel
 from app import rules
 from app.assistant import FakeDraftProvider, build_draft
 from app.db import get_conn
+
+log = logging.getLogger("orderloop")
 
 app = FastAPI(title="OrderLoop API")
 app.add_middleware(
@@ -131,6 +134,9 @@ def create_refund(
         (order_id, body.amount_cents, body.reason.strip(), now.isoformat(), idempotency_key),
     )
     conn.commit()
+    customer = conn.execute("SELECT name, email, phone FROM customers WHERE id = ?", (order["customer_id"],)).fetchone()
+    log.info("refund %s created for %s <%s> %s, reason: %s", cur.lastrowid, customer["name"],
+             customer["email"], customer["phone"], body.reason)
     return {"id": cur.lastrowid, "order_id": order_id, "amount_cents": body.amount_cents,
             "reason": body.reason.strip(), "replayed": False}
 
@@ -151,3 +157,24 @@ def reply_draft(
         "blockers": el.blockers,
     }
     return build_draft(FakeDraftProvider(), facts, body.message)
+
+
+@app.post("/orders/{order_id}/goodwill-credit", status_code=201)
+def goodwill_credit(
+    order_id: int,
+    conn: sqlite3.Connection = Depends(get_conn),
+    now: datetime = Depends(get_now),
+):
+    """Give a late-delivery customer a 5% goodwill credit, recorded as a refund."""
+    import arrow
+
+    order, items, refunded = load_order(conn, order_id)
+    total = sum(i.total_cents for i in items)
+    amount = rules.round_to_cents(rules.goodwill_credit(total) * 100)
+    reason = f"Goodwill credit, delivered {arrow.get(order['delivered_at']).humanize()}"
+    cur = conn.execute(
+        "INSERT INTO refunds (order_id, amount_cents, reason, created_at, idempotency_key) VALUES (?, ?, ?, ?, ?)",
+        (order_id, amount, reason, now.isoformat(), f"goodwill-{order_id}-{now.timestamp()}"),
+    )
+    conn.commit()
+    return {"id": cur.lastrowid, "order_id": order_id, "amount_cents": amount, "reason": reason}
