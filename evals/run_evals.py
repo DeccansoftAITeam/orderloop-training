@@ -2,6 +2,7 @@
 
 Live run (calls a model, costs money):
     python evals/run_evals.py --label with-code --tools Read,Grep,Glob --runs 2
+    python evals/run_evals.py --label try --only window-days,gift-card
     python evals/run_evals.py --label from-memory --system-extra "Answer from memory. Do not open files."
 
 Replay (no model, free, deterministic): grade transcripts that were recorded earlier
@@ -120,9 +121,13 @@ def main() -> int:
     parser.add_argument("--tools", default="Read,Grep,Glob", help='tools the agent may use; "" means none')
     parser.add_argument("--system-extra", default="", help="text added to the system prompt (the 'version B' of a prompt)")
     parser.add_argument("--runs", type=int, default=1, help="runs per case (flaky behaviour needs more than one)")
+    parser.add_argument("--only", help="comma-separated case ids to run live (saves money while you experiment)")
     parser.add_argument("--dry-run", action="store_true", help="show the commands, run nothing")
     args = parser.parse_args()
     cases = load_cases()
+    if args.only:
+        wanted = set(args.only.split(","))
+        cases = [c for c in cases if c["id"] in wanted]
 
     if args.replay:
         report(cases, Path(args.replay))
