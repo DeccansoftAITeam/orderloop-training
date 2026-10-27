@@ -1,0 +1,5 @@
+{
+  "wp-a": ["backend/app/stats.py", "backend/app/main.py", "backend/tests/test_stats.py", "CHANGELOG.md"],
+  "wp-b": ["frontend/src/App.tsx", "frontend/src/api.ts", "CHANGELOG.md"],
+  "wp-c": ["docs/api.md"]
+}
