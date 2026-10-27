@@ -44,7 +44,9 @@ The reply draft comes from one of two providers, chosen by `ORDERLOOP_DRAFT_PROV
 | `template` (default) | Deterministic, offline wording that varies by situation. No key, no network. |
 | `claude` | Calls the Anthropic API through the official `anthropic` SDK. |
 
-To use Claude, set the key in the shell that starts the backend. The key is read only from the standard `ANTHROPIC_API_KEY` variable. Never put it in a file or commit it.
+To use Claude, set the key in the shell that starts the backend. The key is read only from the standard `ANTHROPIC_API_KEY` variable. Never commit it. For local convenience you may keep it in an untracked `.env` (already in `.gitignore`) and start the backend with `uv run --env-file ../.env uvicorn app.main:app --reload --port 8000`.
+
+A user-level key that is not tied to one workspace also needs `ANTHROPIC_WORKSPACE_ID` (the workspace id from the Anthropic console); it is sent as the `anthropic-workspace-id` header. A workspace-scoped key does not need it.
 
 PowerShell:
 
@@ -73,7 +75,7 @@ cd backend
 uv run pytest -q
 ```
 
-Expected: `35 passed` on `main`. The lab start tags have fewer (for example `17 passed` at `lab-01-start`).
+Expected: `37 passed` on `main`. The lab start tags have fewer (for example `17 passed` at `lab-01-start`).
 
 ## How the labs use this repo
 
