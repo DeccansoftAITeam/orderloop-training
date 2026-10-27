@@ -65,6 +65,7 @@ hook = ROOT / ".githooks" / "pre-commit"
 check(hook.exists(), ".githooks/pre-commit exists")
 check(git("config", "core.hooksPath") == ".githooks", "git is configured with core.hooksPath = .githooks")
 hook_text = hook.read_text(encoding="utf-8") if hook.exists() else ""
+check(b"" not in (hook.read_bytes() if hook.exists() else b""), "the hook uses LF line endings (VS Code status bar: click CRLF, choose LF)")
 check("secret_scan.py" in hook_text and "--staged" in hook_text, "the hook runs secret_scan.py --staged")
 tmp = Path(tempfile.mkdtemp(prefix="lab18-"))
 try:
