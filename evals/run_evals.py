@@ -3,7 +3,6 @@
 Live run (calls a model, costs money):
     python evals/run_evals.py --label with-code --tools Read,Grep,Glob --runs 2
     python evals/run_evals.py --label try --only window-days,gift-card
-    python evals/run_evals.py --label from-memory --system-extra "Answer from memory. Do not open files."
 
 Replay (no model, free, deterministic): grade transcripts that were recorded earlier
     python evals/run_evals.py --replay evals/recorded/from-memory
