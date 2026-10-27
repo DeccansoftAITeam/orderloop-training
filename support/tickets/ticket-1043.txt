@@ -1,0 +1,10 @@
+Ticket 1043 | Order ORD-1043 | Channel: web form
+Customer: Ravi Menon (synthetic data)
+Subject: Where is my refund?
+
+Hello,
+I returned a jacket 6 days ago and I have not seen the refund yet.
+The order total was 12,500 cents. Can you tell me what happens next?
+
+Thanks,
+Ravi
