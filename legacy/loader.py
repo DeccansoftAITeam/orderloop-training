@@ -1,40 +1,27 @@
-#!/usr/bin/env python2
-# -*- coding: utf-8 -*-
 """CSV loading for the nightly settlement. Input files are UTF-8."""
 
 import csv
-import string
 import sys
 
 
-def to_text(value):
-    """Return unicode text for a str (UTF-8 bytes) or unicode value."""
-    if isinstance(value, basestring):
-        if isinstance(value, unicode):
-            return value
-        return value.decode('utf-8')
-    return unicode(value)
+def _rows(path):
+    with open(path, encoding="utf-8", newline="") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            yield reader.line_num, row
 
 
 def load_merchants(path):
     """Return {merchant id: merchant dict}. A blank tier means 'not rated yet' and becomes None."""
     merchants = {}
-    f = open(path, 'rb')
-    try:
-        for row in csv.DictReader(f):
-            tier = row['tier']
-            if tier == '':
-                tier = None
-            else:
-                tier = int(tier)
-            merchants[row['id']] = {
-                'id': row['id'],
-                'name': to_text(row['name']),
-                'tier': tier,
-                'fee_bps': int(row['fee_bps']),
-            }
-    finally:
-        f.close()
+    for _, row in _rows(path):
+        tier = row["tier"]
+        merchants[row["id"]] = {
+            "id": row["id"],
+            "name": row["name"],
+            "tier": None if tier == "" else int(tier),
+            "fee_bps": int(row["fee_bps"]),
+        }
     return merchants
 
 
@@ -42,21 +29,18 @@ def load_orders(path):
     """Return (orders, bad_lines). A row with a bad amount is skipped and its line number is kept."""
     orders = []
     bad = []
-    f = open(path, 'rb')
-    reader = csv.DictReader(f)
-    for row in reader:
+    for line_num, row in _rows(path):
         try:
             orders.append({
-                'id': row['order_id'],
-                'merchant_id': row['merchant_id'],
-                'date': row['date'],
-                'amount': int(row['amount_cents']),
-                'status': string.upper(row['status']),
+                "id": row["order_id"],
+                "merchant_id": row["merchant_id"],
+                "date": row["date"],
+                "amount": int(row["amount_cents"]),
+                "status": row["status"].upper(),
             })
-        except ValueError, e:
-            bad.append(reader.line_num)
-            print >>sys.stderr, 'skipped orders line %d: %s' % (reader.line_num, e)
-    f.close()
+        except ValueError as e:
+            bad.append(line_num)
+            print(f"skipped orders line {line_num}: {e}", file=sys.stderr)
     return orders, bad
 
 
@@ -64,18 +48,15 @@ def load_refunds(path):
     """Return (refunds, bad_lines), like load_orders."""
     refunds = []
     bad = []
-    f = open(path, 'rb')
-    reader = csv.DictReader(f)
-    for row in reader:
+    for line_num, row in _rows(path):
         try:
             refunds.append({
-                'id': row['refund_id'],
-                'order_id': row['order_id'],
-                'amount': int(row['amount_cents']),
-                'date': row['date'],
+                "id": row["refund_id"],
+                "order_id": row["order_id"],
+                "amount": int(row["amount_cents"]),
+                "date": row["date"],
             })
-        except ValueError, e:
-            bad.append(reader.line_num)
-            print >>sys.stderr, 'skipped refunds line %d: %s' % (reader.line_num, e)
-    f.close()
+        except ValueError as e:
+            bad.append(line_num)
+            print(f"skipped refunds line {line_num}: {e}", file=sys.stderr)
     return refunds, bad
