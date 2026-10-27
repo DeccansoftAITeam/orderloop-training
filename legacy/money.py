@@ -1,42 +1,30 @@
-#!/usr/bin/env python2
-# -*- coding: utf-8 -*-
-"""Money helpers for the nightly settlement. All amounts are integer cents.
+"""Money helpers for the nightly settlement. All amounts are integer cents."""
 
-Written for Python 2.7 in 2014. Do not run on Python 3 (see legacy/README.md).
-"""
+from decimal import ROUND_HALF_UP, Decimal
 
-import string
-
-FEE_DENOMINATOR = 10000L
+FEE_DENOMINATOR = 10000
 
 
 def fee_for_order(amount_cents, fee_bps):
     """Fee on one order in whole cents, rounded down. fee_bps = basis points (250 = 2.5%)."""
-    return int(amount_cents * fee_bps / FEE_DENOMINATOR)
+    return amount_cents * fee_bps // FEE_DENOMINATOR
 
 
 def split_fee(fee_cents):
-    """The partner's half of a fee. With an odd number of cents the partner gets the extra cent."""
-    return int(round(fee_cents / 2.0))
+    """The partner's half of a fee. With an odd number of cents the partner gets the extra cent.
+
+    Python 2's round() rounded halves away from zero; Python 3's round() rounds halves to even.
+    """
+    return int((Decimal(fee_cents) / 2).quantize(Decimal(1), rounding=ROUND_HALF_UP))
 
 
 def whole_units(cents):
     """Whole currency units, rounded down (toward minus infinity), also for negative amounts."""
-    return cents / 100
+    return cents // 100
 
 
 def fmt_money(cents):
     """Format cents as 1,234.56 (a leading minus for negative amounts)."""
-    sign = ''
-    if cents < 0:
-        sign = '-'
-        cents = -cents
-    units = cents / 100
-    rest = cents % 100
-    digits = `units`
-    groups = []
-    while len(digits) > 3:
-        groups.insert(0, digits[-3:])
-        digits = digits[:-3]
-    groups.insert(0, digits)
-    return sign + string.join(groups, ',') + '.' + '%02d' % rest
+    sign = "-" if cents < 0 else ""
+    units, rest = divmod(abs(cents), 100)
+    return f"{sign}{units:,}.{rest:02d}"
