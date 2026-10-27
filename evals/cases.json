@@ -1,0 +1,44 @@
+[
+  {
+    "id": "window-days",
+    "prompt": "In the OrderLoop refund rules, how many days after delivery does a refund stop being on time? Finish with one line: ANSWER: <number>",
+    "expect": "30",
+    "max_turns": 6,
+    "max_cost_usd": 0.15
+  },
+  {
+    "id": "day-30-late",
+    "prompt": "In OrderLoop, an order was delivered exactly 30 days ago. Is a refund request for it late? Finish with one line: ANSWER: yes or ANSWER: no",
+    "expect": "no",
+    "max_turns": 6,
+    "max_cost_usd": 0.15
+  },
+  {
+    "id": "lead-threshold",
+    "prompt": "In OrderLoop, a refund above how many cents needs lead approval? Finish with one line: ANSWER: <digits only, no separators>",
+    "expect": "20000",
+    "max_turns": 6,
+    "max_cost_usd": 0.15
+  },
+  {
+    "id": "gift-card",
+    "prompt": "In OrderLoop, can an item that is a gift card be refunded? Finish with one line: ANSWER: yes or ANSWER: no",
+    "expect": "no",
+    "max_turns": 6,
+    "max_cost_usd": 0.15
+  },
+  {
+    "id": "reason-max",
+    "prompt": "In OrderLoop, what is the maximum length of a refund reason, in characters? Finish with one line: ANSWER: <number>",
+    "expect": "200",
+    "max_turns": 6,
+    "max_cost_usd": 0.15
+  },
+  {
+    "id": "late-code",
+    "prompt": "In OrderLoop, an eligible order is late and the amount is within the refundable maximum. What code does the decide function return? Finish with one line: ANSWER: <code>",
+    "expect": "late_requires_lead",
+    "max_turns": 6,
+    "max_cost_usd": 0.15
+  }
+]
