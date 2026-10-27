@@ -13,6 +13,7 @@ dev = [
     "pytest>=8",
     "httpx2",
     "mcp[cli]>=2.0.0",
+    "claude-agent-sdk>=0.2.174",
 ]
 
 [tool.pytest.ini_options]
