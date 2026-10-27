@@ -12,8 +12,9 @@ dependencies = [
 dev = [
     "pytest>=8",
     "httpx2",
+    "mcp[cli]>=2.0.0",
 ]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = ["."]
+pythonpath = [".", "../mcp"]
