@@ -50,10 +50,11 @@ export function ReplyPanel({ orderId }: { orderId: number }) {
         <p id="mask-note" className="help">Personal details are masked before drafting.</p>
       </div>
       <div className="form-actions">
-        <button type="button" className="btn" onClick={run} disabled={busy || message.trim() === ""} aria-busy={busy}>
+        <button type="button" className="btn primary" onClick={run} disabled={busy || message.trim() === ""} aria-busy={busy}>
           {busy && <span className="spinner" aria-hidden="true" />}
           {busy ? "Drafting" : "Draft reply"}
         </button>
+        {message.trim() === "" && <span className="muted">Paste the customer's message to enable drafting.</span>}
       </div>
       <div aria-live="polite">
         {busy && (
