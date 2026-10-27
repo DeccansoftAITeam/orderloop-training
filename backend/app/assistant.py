@@ -201,7 +201,11 @@ class ClaudeDraftProvider:
             )
         import anthropic  # reads ANTHROPIC_API_KEY itself; the key is never stored here
 
-        self._client = anthropic.Anthropic(timeout=TIMEOUT_SECONDS, max_retries=1)
+        headers = {}
+        workspace = os.environ.get("ANTHROPIC_WORKSPACE_ID")  # only needed for keys not scoped to one workspace
+        if workspace:
+            headers["anthropic-workspace-id"] = workspace
+        self._client = anthropic.Anthropic(timeout=TIMEOUT_SECONDS, max_retries=1, default_headers=headers or None)
         return self._client
 
     def _call(self, client, facts: dict, masked_message: str) -> str:

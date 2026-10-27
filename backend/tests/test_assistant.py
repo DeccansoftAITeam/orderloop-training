@@ -142,3 +142,35 @@ def test_template_amounts_and_fee_and_determinism():
     assert "$240.00" in out and "$15.00" in out and "Tent" in out
     assert out == t.draft(facts, "x")
     assert invalid_amounts(out, facts) == []
+
+
+def test_workspace_id_is_sent_as_a_header_when_set(monkeypatch):
+    seen = {}
+
+    class FakeAnthropic:
+        def __init__(self, **kwargs):
+            seen.update(kwargs)
+
+    import sys, types
+    monkeypatch.setitem(sys.modules, "anthropic", types.SimpleNamespace(Anthropic=FakeAnthropic))
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-test-placeholder")
+    monkeypatch.setenv("ANTHROPIC_WORKSPACE_ID", "wrkspc_test")
+    from app.assistant import ClaudeDraftProvider
+    ClaudeDraftProvider()._get_client()
+    assert seen["default_headers"] == {"anthropic-workspace-id": "wrkspc_test"}
+
+
+def test_no_workspace_header_when_not_set(monkeypatch):
+    seen = {}
+
+    class FakeAnthropic:
+        def __init__(self, **kwargs):
+            seen.update(kwargs)
+
+    import sys, types
+    monkeypatch.setitem(sys.modules, "anthropic", types.SimpleNamespace(Anthropic=FakeAnthropic))
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-test-placeholder")
+    monkeypatch.delenv("ANTHROPIC_WORKSPACE_ID", raising=False)
+    from app.assistant import ClaudeDraftProvider
+    ClaudeDraftProvider()._get_client()
+    assert seen["default_headers"] is None
