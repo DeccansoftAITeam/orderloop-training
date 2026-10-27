@@ -56,7 +56,7 @@ def recursive_search_is_unsafe(segment: str) -> bool:
     if not paths:
         return True
     for p in paths:
-        norm = p.replace("\\", "/").lstrip("./")
+        norm = p.replace("\\", "/").removeprefix("./")
         if ".." in norm.split("/") or not (norm + "/").startswith(tuple(d + "/" for d in SAFE_DIRS)):
             return True
     return False
@@ -96,4 +96,7 @@ def main() -> None:
     sys.exit(0)
 
 
-main()
+try:
+    main()
+except Exception as exc:  # a bug in this script must not let a call through
+    block(f"internal error ({exc.__class__.__name__})")
