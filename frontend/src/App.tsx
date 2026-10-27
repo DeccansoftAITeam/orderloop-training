@@ -1,92 +1,57 @@
-import { useEffect, useState } from "react";
-import { OrderDetail, OrderSummary, createRefund, draftReply, getOrder, listOrders } from "./api";
+import { useCallback, useEffect, useState } from "react";
+import { getAssistantStatus, type AssistantStatus } from "./api";
+import { OrderDetailPane } from "./components/OrderDetailPane";
+import { OrderQueue } from "./components/OrderQueue";
+import { Toasts, type Toast } from "./components/Toasts";
+import { TopBar } from "./components/TopBar";
 
-const dollars = (cents: number) => `$${(cents / 100).toFixed(2)}`;
+let nextToast = 1;
 
 export default function App() {
-  const [query, setQuery] = useState("");
-  const [orders, setOrders] = useState<OrderSummary[]>([]);
   const [selected, setSelected] = useState<number | null>(null);
+  const [assistant, setAssistant] = useState<AssistantStatus | null>(null);
+  const [toasts, setToasts] = useState<Toast[]>([]);
+  const [version, setVersion] = useState(0);
 
   useEffect(() => {
-    listOrders(query).then(setOrders).catch(() => setOrders([]));
-  }, [query]);
+    void getAssistantStatus().then(setAssistant);
+  }, []);
 
-  return (
-    <main>
-      <h1>OrderLoop</h1>
-      <div className="layout">
-        <section>
-          <input
-            placeholder="Search order number or customer"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
-          <table>
-            <thead>
-              <tr><th>Order</th><th>Customer</th><th>Total</th><th>Status</th></tr>
-            </thead>
-            <tbody>
-              {orders.map((o) => (
-                <tr key={o.id} className={o.id === selected ? "active" : ""} onClick={() => setSelected(o.id)}>
-                  <td>{o.id}</td><td>{o.customer_name}</td><td>{dollars(o.total_cents)}</td><td>{o.status}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </section>
-        <section>{selected ? <OrderPanel id={selected} /> : <p>Select an order.</p>}</section>
-      </div>
-    </main>
+  const dismiss = useCallback((id: number) => setToasts((t) => t.filter((x) => x.id !== id)), []);
+  const push = useCallback(
+    (kind: Toast["kind"], text: string) => {
+      const id = nextToast++;
+      setToasts((t) => [...t, { id, kind, text }]);
+      setTimeout(() => dismiss(id), kind === "error" ? 8000 : 4500);
+    },
+    [dismiss],
   );
-}
-
-function OrderPanel({ id }: { id: number }) {
-  const [order, setOrder] = useState<OrderDetail | null>(null);
-  const [amount, setAmount] = useState("");
-  const [reason, setReason] = useState("");
-  const [message, setMessage] = useState("");
-  const [draft, setDraft] = useState("");
-  const [notice, setNotice] = useState("");
-
-  const reload = () => getOrder(id).then(setOrder);
-  useEffect(() => { setNotice(""); setDraft(""); reload(); }, [id]);
-
-  if (!order) return <p>Loading...</p>;
-  const el = order.eligibility;
-
-  const submit = async () => {
-    try {
-      await createRefund(id, Math.round(Number(amount) * 100), reason);
-      setNotice("Refund recorded.");
-      setAmount(""); setReason("");
-      await reload();
-    } catch (e) {
-      setNotice((e as Error).message);
-    }
-  };
 
   return (
-    <div>
-      <h2>Order {order.id} for {order.customer.name}</h2>
-      <ul>
-        {order.items.map((i) => (
-          <li key={i.sku}>{i.name} x{i.qty} - {dollars(i.total_cents)} {i.refundable ? "" : "(not refundable)"}</li>
-        ))}
-      </ul>
-      <p>
-        {el.eligible ? `Refundable up to ${dollars(el.max_refundable_cents)}` : `Not eligible: ${el.blockers.join(", ")}`}
-        {el.late ? " (late)" : ""}
-      </p>
-      <h3>Refund</h3>
-      <input placeholder="Amount in dollars" value={amount} onChange={(e) => setAmount(e.target.value)} />
-      <input placeholder="Reason (3-200 characters)" value={reason} onChange={(e) => setReason(e.target.value)} />
-      <button onClick={submit}>Refund</button>
-      {notice && <p role="status">{notice}</p>}
-      <h3>Reply to customer</h3>
-      <textarea placeholder="Paste the customer's message" value={message} onChange={(e) => setMessage(e.target.value)} />
-      <button onClick={() => draftReply(id, message).then((r) => setDraft(r.draft))}>Draft reply</button>
-      {draft && <textarea value={draft} onChange={(e) => setDraft(e.target.value)} rows={8} />}
+    <div className="shell">
+      <TopBar assistant={assistant} />
+      <main className={`panes${selected !== null ? " has-selection" : ""}`}>
+        <OrderQueue selected={selected} onSelect={setSelected} version={version} />
+        <div className="detail-pane">
+          {selected === null ? (
+            <div className="empty-state">
+              <h2>Select an order</h2>
+              <p className="muted">Pick an order from the queue to review eligibility, issue a refund or draft a reply.</p>
+            </div>
+          ) : (
+            <OrderDetailPane
+              id={selected}
+              onBack={() => setSelected(null)}
+              onRefunded={(m) => {
+                push("success", m);
+                setVersion((v) => v + 1);
+              }}
+              onError={(m) => push("error", m)}
+            />
+          )}
+        </div>
+      </main>
+      <Toasts toasts={toasts} dismiss={dismiss} />
     </div>
   );
 }

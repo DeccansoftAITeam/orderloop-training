@@ -5,6 +5,6 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5173,
-    proxy: { "/api": { target: "http://localhost:8000", rewrite: (p) => p.replace(/^\/api/, "") } },
+    proxy: { "/api": { target: process.env.ORDERLOOP_API ?? "http://localhost:8000", rewrite: (p) => p.replace(/^\/api/, "") } },
   },
 });
