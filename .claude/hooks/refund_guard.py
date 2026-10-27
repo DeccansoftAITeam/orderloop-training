@@ -32,7 +32,7 @@ def block(reason: str) -> None:
 
 def main() -> None:
     try:
-        event = json.loads(sys.stdin.buffer.read().decode("utf-8"))
+        event = json.loads(sys.stdin.buffer.read().decode("utf-8-sig"))
         tool = event["tool_name"]
         tool_input = event.get("tool_input") or {}
     except Exception as exc:  # fail closed
