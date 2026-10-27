@@ -1,0 +1,90 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+      - name: Backend tests
+        working-directory: backend
+        run: uv run pytest -q
+      - name: Gate script tests
+        run: python -m unittest discover -s scripts -p "test_ai_gate.py"
+
+  # Needs ANTHROPIC_API_KEY or CLAUDE_CODE_OAUTH_TOKEN as a secret on your fork.
+  # Without one, every step below is skipped and the job reports reviewed=false.
+  ai-review:
+    needs: tests
+    if: ${{ github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pull-requests: read
+      issues: read
+      id-token: write
+    env:
+      HAS_AUTH: ${{ secrets.ANTHROPIC_API_KEY != '' || secrets.CLAUDE_CODE_OAUTH_TOKEN != '' }}
+    outputs:
+      reviewed: ${{ steps.mark.outputs.reviewed }}
+    steps:
+      - name: Check out the pull request
+        if: ${{ env.HAS_AUTH == 'true' }}
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Claude review
+        if: ${{ env.HAS_AUTH == 'true' }}
+        uses: anthropics/claude-code-action@8041f1d17e0e7d2f2cfe35002962e9f26237c0bb # v1.0.263
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          plugin_marketplaces: "https://github.com/anthropics/claude-code.git"
+          plugins: "code-review@claude-code-plugins"
+          prompt: "/code-review:code-review --comment ${{ github.repository }}/pull/${{ github.event.pull_request.number }}"
+          claude_args: '--max-turns 15 --allowedTools "mcp__github_inline_comment__create_inline_comment"'
+      - name: Mark the review as done
+        id: mark
+        if: ${{ env.HAS_AUTH == 'true' }}
+        run: echo "reviewed=true" >> "$GITHUB_OUTPUT"
+
+  gate:
+    needs: [tests, ai-review]
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions: {}
+    env:
+      TESTS: ${{ needs.tests.result }}
+      AI: ${{ needs.ai-review.result }}
+      REVIEWED: ${{ needs.ai-review.outputs.reviewed }}
+      REQUIRE: ${{ vars.REQUIRE_AI_REVIEW }}
+      EVENT: ${{ github.event_name }}
+    steps:
+      - name: Fail closed
+        run: |
+          set -eu
+          if [ "$TESTS" != "success" ]; then echo "tests: $TESTS"; exit 1; fi
+          if [ "$EVENT" = "pull_request" ]; then
+            if [ "$AI" != "success" ]; then echo "ai-review: $AI"; exit 1; fi
+            if [ "$REVIEWED" != "true" ] && [ "$REQUIRE" = "true" ]; then
+              echo "An AI review is required but did not run"; exit 1
+            fi
+          fi
+          echo "gate passed"
