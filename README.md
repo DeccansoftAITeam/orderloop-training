@@ -78,7 +78,7 @@ cd backend
 uv run pytest -q
 ```
 
-Expected: `40 passed` on `main`. The lab start tags have fewer (for example `37 passed` at `lab-01-start`).
+Expected: `40 passed` on `main`. Lab start tags show 37 to 40, and each lab guide states its own number.
 
 ## How the labs use this repo
 
@@ -101,3 +101,41 @@ Labs do not depend on each other. If you get stuck, compare with the branch `lab
 git fetch upstream
 git diff lab-02 upstream/lab-02-solution
 ```
+
+## What you build in each lab
+
+Branches and tags in this repository:
+
+| Name | What it is |
+|---|---|
+| `main` | The finished sample app (this README). Never commit to it. |
+| `lab-NN-start` (tag) | The starting point of lab NN. You branch from it. |
+| `lab-NN-solution` (branch) | One worked answer for lab NN, for catching up. Compare, do not merge. |
+| `capstone-start`, `capstone-solution` | The same pair for the capstone. |
+| `flawed-pr` | A deliberately flawed pull request that Lab 16 asks you to review. Not a lab start. |
+
+Every lab starts from the same OrderLoop app and adds one piece of the agent system around it. Labs are independent: do any lab without the others.
+
+| Lab | Start tag | You build |
+|---|---|---|
+| 1 First session and memory | `lab-01-start` | `AGENTS.md` and path rules that stop Claude guessing the refund rules |
+| 2 Plan, implement, verify | `lab-02-start` | The 10% restocking fee, planned in plan mode and written tests-first; you also rewind a wrong turn |
+| 3 Skills: build one | `lab-03-start` | A model-invoked `add-refund-rule` skill and a user-invoked `pr-summary` skill |
+| 4 Skills: compose and test | `lab-04-start` | A skill with a script and a reference file, plus a forked review skill |
+| 5 Subagents and orchestration | `lab-05-start` | Six role subagents, run as a pipeline, a parallel fan-out and a writer and reviewer loop, to add a refund-status filter |
+| 6 Permissions | `lab-06-start` | Allow, ask and deny rules that protect the customer data file and block pushes to `main` |
+| 7 Hooks | `lab-07-start` | Hooks that block reads of secrets, run tests after an edit, and write an audit log |
+| 8 Connect MCP | `lab-08-start` | A project-scoped MCP server connection, inspected and permission-controlled |
+| 9 Build an MCP server | `lab-09-start` | The `orderloop` MCP server: three read-only tools with masked contact details |
+| 10 Refund Triage agent | `lab-10-start` | A skill, a limited subagent, a guard hook and permissions assembled into one agent |
+| 11 Plugin | `lab-11-start` | The `orderloop-sdlc` plugin, installed from a local marketplace |
+| 12 Spec-driven feature | `lab-12-start` | A spec for lead approval of large refunds, then one work package built tests-first |
+| 13 Parallel work | `lab-13-start` | Three work packages in separate worktrees, merged with one conflict resolved |
+| 14 Agent teams | `lab-14-start` | A small review team on one change, with a written debate (experimental) |
+| 15 Legacy migration | `lab-15-start` | A Python 2 settlement job migrated to Python 3 behind golden-output tests |
+| 16 Review and audit | `lab-16-start` | A `REVIEW.md` of findings by severity for the flawed pull request (`flawed-pr`) |
+| 17 Headless and CI | `lab-17-start` | A fail-closed AI review gate and a GitHub Actions workflow |
+| 18 Security | `lab-18-start` | Injection tests against the agent, the control that stops them, and secret scanning |
+| 19 Evals | `lab-19-start` | A small eval harness with code-based graders and replayed runs |
+| 20 Agent SDK | `lab-20-start` | A Python script that calls the Agent SDK with typed output and a dry-run mode |
+| Capstone | `capstone-start` | One new feature end to end: spec, tests first, review and a pull request with a green CI run |
