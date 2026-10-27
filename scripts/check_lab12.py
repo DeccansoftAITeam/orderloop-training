@@ -98,7 +98,7 @@ check(len(set(ids)) == len(ids) and all(re.fullmatch(r"AC-\d+", i) for i in ids)
 
 def is_ears(text_: str) -> bool:
     t = text_.strip()
-    return bool(re.search(r"\bshall\b", t, re.I)) and bool(re.match(r"(when|while|where|if|the)", t, re.I))
+    return bool(re.search(r"\bshall\b", t, re.I)) and bool(re.match(r"(when|while|where|if|the)\b", t, re.I))
 
 check(criteria and all(is_ears(col(r, "criterion")) for r in criteria), "every criterion contains SHALL (EARS form)")
 texts = [col(r, "criterion") for r in criteria]
