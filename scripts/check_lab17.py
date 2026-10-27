@@ -186,6 +186,10 @@ if GATE.exists():
           "gate: is_error must be the boolean false (exit 2)")
     check(gate({**ok, "structured_output": {"verdict": "APPROVE", "findings": []}}) == 2,
           "gate: the verdict must match exactly (exit 2)")
+    check(gate({**ok, "structured_output": {"verdict": "approve", "findings": [{"severity": "severe"}]}}) == 2,
+          "gate: an unknown severity word is rejected, not treated as harmless (exit 2)")
+    check(gate({**ok, "structured_output": {"verdict": "approve"}}) == 2,
+          "gate: a missing findings list is rejected (exit 2)")
     check(gate(b"\xff\xfe\x00\x00garbage") == 2, "gate: undecodable bytes exit 2, not a traceback exit 1")
     src = GATE.read_text(encoding="utf-8")
     check("sys.exit" in src and "except" in src, "gate: catches errors itself and exits with its own code")
