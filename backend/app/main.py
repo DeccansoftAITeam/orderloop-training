@@ -8,6 +8,7 @@ from pydantic import BaseModel
 from app import rules
 from app.assistant import DraftProviderUnavailable, build_draft, first_name_of, get_provider, provider_settings
 from app.db import get_conn
+from app.messages import CUSTOMER_MESSAGES
 
 app = FastAPI(title="OrderLoop API")
 app.add_middleware(
@@ -106,6 +107,7 @@ def get_order(order_id: int, conn: sqlite3.Connection = Depends(get_conn), now: 
         "items": [i.__dict__ | {"total_cents": i.total_cents, "refundable": i.refundable} for i in items],
         "refunds": [dict(r) for r in refunds],
         "eligibility": el.__dict__,
+        "customer_message": CUSTOMER_MESSAGES.get(order_id),
     }
 
 

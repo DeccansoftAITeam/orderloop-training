@@ -85,7 +85,7 @@ export function OrderDetailPane({ id, onBack, onRefunded, onError }: Props) {
         />
         <RefundHistory refunds={order.refunds} />
       </div>
-      <ReplyPanel key={order.id} orderId={order.id} />
+      <ReplyPanel key={order.id} orderId={order.id} initialMessage={order.customer_message ?? ""} />
     </article>
   );
 }

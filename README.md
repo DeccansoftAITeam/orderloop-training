@@ -37,6 +37,9 @@ Open http://localhost:5173.
 
 ## Reply drafting: template or Claude
 
+Each seeded order comes with a synthetic inbound customer message (`backend/app/messages.py`). The reply panel loads it as a default, so you can press **Draft reply** straight away or edit the text first. Some messages contain a fake email or phone number so you can see the masking work.
+
+
 The reply draft comes from one of two providers, chosen by `ORDERLOOP_DRAFT_PROVIDER`:
 
 | Value | What it does |
@@ -75,7 +78,7 @@ cd backend
 uv run pytest -q
 ```
 
-Expected: `38 passed` on `main`. The lab start tags have fewer (for example `17 passed` at `lab-01-start`).
+Expected: `40 passed` on `main`. The lab start tags have fewer (for example `17 passed` at `lab-01-start`).
 
 ## How the labs use this repo
 

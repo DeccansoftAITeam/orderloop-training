@@ -60,3 +60,21 @@ def test_reply_draft_masks_contact_details(client):
     res = client.post("/orders/1001/reply-draft", json={"message": "Mail me at a.b@example.test or +1 555 0199 123"})
     masked = res.json()["masked_message"]
     assert "example.test" not in masked and "555" not in masked
+
+
+def test_order_detail_includes_the_customers_message(client):
+    body = client.get("/orders/1001").json()
+    assert "zipper" in body["customer_message"]
+
+
+def test_every_seeded_order_has_a_message_without_a_customer_name(client):
+    import csv
+    from app.messages import CUSTOMER_MESSAGES
+    from app.seed import CUSTOMERS_CSV, ORDERS
+
+    assert {o[0] for o in ORDERS} == set(CUSTOMER_MESSAGES)
+    with open(CUSTOMERS_CSV, newline="", encoding="utf-8") as fh:
+        names = [row["name"] for row in csv.DictReader(fh)]
+    for text in CUSTOMER_MESSAGES.values():
+        for name in names:
+            assert name.split()[0] not in text and name.split()[-1] not in text

@@ -2,8 +2,8 @@ import { useState } from "react";
 import { draftReply, type ReplyDraft } from "../api";
 import { Badge } from "./Badge";
 
-export function ReplyPanel({ orderId }: { orderId: number }) {
-  const [message, setMessage] = useState("");
+export function ReplyPanel({ orderId, initialMessage = "" }: { orderId: number; initialMessage?: string }) {
+  const [message, setMessage] = useState(initialMessage);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<ReplyDraft | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -38,23 +38,33 @@ export function ReplyPanel({ orderId }: { orderId: number }) {
     <section className="card" aria-labelledby="reply-title">
       <h3 id="reply-title" className="card-title">Reply to customer</h3>
       <div className="field">
-        <label htmlFor="customer-message">Customer message</label>
+        <div className="field-row">
+          <label htmlFor="customer-message">Customer message</label>
+          {initialMessage !== "" && message !== initialMessage && (
+            <button type="button" className="btn small ghost push" onClick={() => setMessage(initialMessage)}>
+              Reset to original
+            </button>
+          )}
+        </div>
         <textarea
           id="customer-message"
           rows={4}
           value={message}
-          placeholder="Paste what the customer wrote."
+          placeholder="Write or paste what the customer wrote."
           onChange={(e) => setMessage(e.target.value)}
           aria-describedby="mask-note"
         />
-        <p id="mask-note" className="help">Personal details are masked before drafting.</p>
+        <p id="mask-note" className="help">
+          {initialMessage !== "" ? "Loaded from the customer's latest message. You can edit it. " : ""}
+          Personal details are masked before drafting.
+        </p>
       </div>
       <div className="form-actions">
         <button type="button" className="btn primary" onClick={run} disabled={busy || message.trim() === ""} aria-busy={busy}>
           {busy && <span className="spinner" aria-hidden="true" />}
           {busy ? "Drafting" : "Draft reply"}
         </button>
-        {message.trim() === "" && <span className="muted">Paste the customer's message to enable drafting.</span>}
+        {message.trim() === "" && <span className="muted">Write or paste the customer's message to enable drafting.</span>}
       </div>
       <div aria-live="polite">
         {busy && (

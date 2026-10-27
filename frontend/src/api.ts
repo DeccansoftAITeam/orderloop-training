@@ -43,6 +43,7 @@ export interface OrderDetail {
   items: OrderItem[];
   refunds: Refund[];
   eligibility: Eligibility;
+  customer_message?: string | null;
 }
 
 export interface ReplyDraft {
