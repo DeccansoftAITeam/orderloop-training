@@ -1,0 +1,5 @@
+{
+  "permissions": {
+    "deny": ["mcp__files__write_file", "mcp__files__edit_file", "mcp__files__move_file"]
+  }
+}
