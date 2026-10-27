@@ -1,5 +1,11 @@
 {
   "permissions": {
-    "deny": ["mcp__files__write_file", "mcp__files__edit_file", "mcp__files__move_file"]
+    "allow": ["mcp__files__read_text_file", "mcp__files__list_directory"],
+    "deny": [
+      "mcp__files__write_file",
+      "mcp__files__edit_file",
+      "mcp__files__move_file",
+      "mcp__files__create_directory"
+    ]
   }
 }
