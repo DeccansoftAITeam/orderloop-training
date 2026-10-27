@@ -8,6 +8,7 @@ from pydantic import BaseModel
 from app import rules
 from app.assistant import FakeDraftProvider, build_draft
 from app.db import get_conn
+from app.stats import refund_stats
 
 app = FastAPI(title="OrderLoop API")
 app.add_middleware(
@@ -60,6 +61,11 @@ def order_eligibility(order, items, refunded, now) -> rules.Eligibility:
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+
+@app.get("/stats/refunds")
+def stats_refunds(conn: sqlite3.Connection = Depends(get_conn)):
+    return refund_stats(conn)
 
 
 @app.get("/orders")
