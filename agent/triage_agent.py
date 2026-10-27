@@ -85,8 +85,8 @@ async def run_live(conn, now, order_id: int, requested: int, message: str,
     except Exception as exc:  # the SDK raises after an error result (budget, turns); keep what we saw
         if result is None:
             return {"recommendation": "reject", "approved_cents": 0, "reasons": [f"agent_failed:{type(exc).__name__}"]}
-    if result is None or result.subtype != "success" or not result.structured_output:
-        subtype = result.subtype if result else "no_result"
+    if result is None or result.is_error or result.subtype != "success" or not result.structured_output:
+        subtype = "no_result" if result is None else ("api_error" if result.is_error else result.subtype)
         return {"recommendation": "reject", "approved_cents": 0, "reasons": [f"agent_failed:{subtype}"]}
     return {**result.structured_output, "cost_usd": result.total_cost_usd, "turns": result.num_turns}
 
