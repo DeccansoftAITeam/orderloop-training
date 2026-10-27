@@ -22,7 +22,7 @@ from mcp.server.mcpserver.exceptions import ToolError  # noqa: E402
 from mcp.types import ToolAnnotations  # noqa: E402
 
 from app import rules  # noqa: E402
-from app.db import connect  # noqa: E402
+from app.db import connect, db_path  # noqa: E402
 
 log = logging.getLogger("orderloop")  # MCPServer sends logging to stderr
 server = MCPServer("orderloop", instructions="Read-only access to OrderLoop orders and refund rules.")
@@ -45,8 +45,16 @@ def mask_phone(phone: str) -> str:
 
 
 def open_db() -> sqlite3.Connection:
-    conn = connect()  # path from ORDERLOOP_DB, else the backend default
+    path = db_path()
+    if not Path(path).exists():  # connect() would silently create an empty file
+        raise ToolError("The OrderLoop database does not exist. Seed it: cd backend && uv run python -m app.seed")
+    conn = connect(path)
     conn.execute("PRAGMA query_only = ON")  # the server can never write
+    try:
+        conn.execute("SELECT 1 FROM orders LIMIT 1")
+    except sqlite3.OperationalError:
+        conn.close()
+        raise ToolError("The OrderLoop database has no tables. Seed it: cd backend && uv run python -m app.seed")
     return conn
 
 

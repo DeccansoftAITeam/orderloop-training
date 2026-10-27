@@ -64,6 +64,15 @@ def test_unknown_order_is_an_error_result_not_a_crash():
     assert "does not exist" in result.content[0].text
 
 
+def test_missing_database_is_a_clear_error_and_creates_nothing(tmp_path, monkeypatch):
+    missing = tmp_path / "nope.db"
+    monkeypatch.setenv("ORDERLOOP_DB", str(missing))
+    result = call("lookup_order", {"order_id": 1001})
+    assert result.is_error
+    assert "Seed it" in result.content[0].text
+    assert not missing.exists()
+
+
 def test_invalid_order_id_is_rejected():
     assert call("lookup_order", {"order_id": -5}).is_error
 
