@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__orderloop__lookup_order",
+      "mcp__orderloop__check_refund_eligibility",
+      "mcp__orderloop__list_orders_needing_attention"
+    ],
+    "deny": [
+      "Bash(curl *)",
+      "Bash(sqlite3 *)",
+      "Read(./backend/orderloop.db)",
+      "Read(./seed/customers.csv)"
+    ]
+  },
+  "enabledMcpjsonServers": ["orderloop"],
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python",
+            "args": ["${CLAUDE_PROJECT_DIR}/.claude/hooks/refund_guard.py"],
+            "onFailure": "block",
+            "statusMessage": "Checking refund authority"
+          }
+        ]
+      }
+    ]
+  }
+}
