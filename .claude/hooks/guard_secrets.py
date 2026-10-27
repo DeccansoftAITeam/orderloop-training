@@ -64,7 +64,7 @@ def recursive_search_is_unsafe(segment: str) -> bool:
 
 def main() -> None:
     try:
-        event = json.loads(sys.stdin.buffer.read().decode("utf-8"))
+        event = json.loads(sys.stdin.buffer.read().decode("utf-8-sig"))
         tool = event["tool_name"]
         tool_input = event["tool_input"]
     except Exception as exc:  # fail closed

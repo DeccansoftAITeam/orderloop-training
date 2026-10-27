@@ -26,7 +26,7 @@ def redact(text: str) -> str:
 
 
 def main() -> None:
-    event = json.loads(sys.stdin.buffer.read().decode("utf-8"))
+    event = json.loads(sys.stdin.buffer.read().decode("utf-8-sig"))
     tool_input = event.get("tool_input") or {}
     root = Path(os.environ.get("CLAUDE_PROJECT_DIR") or Path(__file__).resolve().parents[2])
     target = tool_input.get("command") or tool_input.get("file_path") or tool_input.get("pattern") or ""

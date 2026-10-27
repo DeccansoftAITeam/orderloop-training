@@ -12,7 +12,7 @@ from pathlib import Path
 
 def main() -> None:
     try:
-        event = json.loads(sys.stdin.buffer.read().decode("utf-8"))
+        event = json.loads(sys.stdin.buffer.read().decode("utf-8-sig"))
         edited = Path(event["tool_input"]["file_path"]).as_posix()
     except Exception:
         sys.exit(0)  # not our input; do nothing
