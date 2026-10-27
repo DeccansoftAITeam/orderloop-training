@@ -1,0 +1,3 @@
+#!/bin/sh
+# Block a commit that stages something that looks like a secret.
+python scripts/secret_scan.py --staged

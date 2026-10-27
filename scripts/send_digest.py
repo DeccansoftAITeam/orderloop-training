@@ -1,14 +1,14 @@
 """Legacy nightly digest mailer (unused sample script for Lab 18).
 
-All values below are FAKE. They exist so that a secret scan has something to find.
+Credentials come from the environment. Nothing secret is stored in this file.
 """
 
+import os
 import smtplib
 
-SMTP_HOST = "smtp.example.test"
-SMTP_USER = "digest-bot"
-SMTP_PASSWORD = "fake-Passw0rd-not-real-4471"
-DIGEST_API_KEY = "sk-FAKE-live-9f8e7d6c5b4a39281706"
+SMTP_HOST = os.environ.get("DIGEST_SMTP_HOST", "smtp.example.test")
+SMTP_USER = os.environ["DIGEST_SMTP_USER"]
+SMTP_PASSWORD = os.environ["DIGEST_SMTP_PASSWORD"]
 
 
 def send(subject: str, body: str) -> None:
